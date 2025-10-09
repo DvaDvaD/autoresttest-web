@@ -20,3 +20,12 @@ export const payloadSchema = z.object({
   jobId: z.string(),
   config: configSchema,
 });
+
+// Define the Zod schema for progress updates. All fields are optional.
+export const progressUpdateSchema = z.object({
+  progressPercentage: z.number().optional(),
+  currentOperation: z.string().optional(),
+  statusMessage: z.string().optional(),
+});
+
+export type TProgressUpdateSchema = z.infer<typeof progressUpdateSchema>;

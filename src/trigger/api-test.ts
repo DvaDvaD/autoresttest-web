@@ -44,7 +44,7 @@ export const apiTestRunner = schemaTask({
           "Content-Type": "application/json",
           "x-api-key": fastApiKey,
         },
-        body: JSON.stringify({ ...config }),
+        body: JSON.stringify({ config, job_id: jobId }),
         signal,
       });
 

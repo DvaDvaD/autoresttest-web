@@ -50,6 +50,9 @@ export async function POST(request: Request) {
     await tasks.trigger<typeof apiTestRunner>(
       "api-test-runner",
       triggerPayload,
+      {
+        tags: [newJob.id],
+      },
     );
 
     // --- Step 5: Return the new job ID to the frontend ---
@@ -64,6 +67,28 @@ export async function POST(request: Request) {
 }
 
 export async function GET(request: Request) {
-  // TODO: Implement fetching user's job history
-  return NextResponse.json({ message: "Job history" });
+  try {
+    const jobs = await prisma.job.findMany({
+      select: {
+        id: true,
+        status: true,
+        statusMessage: true,
+        progressPercentage: true,
+        currentOperation: true,
+        createdAt: true,
+        summary: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    return NextResponse.json(jobs);
+  } catch (error) {
+    console.error("Error fetching job history:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch job history." },
+      { status: 500 },
+    );
+  }
 }
