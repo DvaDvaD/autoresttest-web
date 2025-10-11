@@ -4,10 +4,20 @@ import { useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
 import { Navbar } from "@/components/Navbar";
 import { PageWrapper } from "@/components/PageWrapper";
 import { JobDetailSkeleton } from "@/components/JobDetailSkeleton";
+import { Badge } from "@/components/ui/badge";
 
 const fetchJob = async (jobId: string) => {
   const response = await fetch(`/api/v1/jobs/${jobId}`);
@@ -21,7 +31,11 @@ export default function JobDetailPage() {
   const params = useParams();
   const jobId = params.jobId as string;
 
-  const { data: job, isLoading, error } = useQuery({
+  const {
+    data: job,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ["job", jobId],
     queryFn: () => fetchJob(jobId),
     enabled: !!jobId,
@@ -29,74 +43,148 @@ export default function JobDetailPage() {
 
   if (isLoading) {
     return (
-        <PageWrapper>
-            <div>
-                <Navbar />
-                <main className="p-4 md:p-8">
-                    <JobDetailSkeleton />
-                </main>
-            </div>
-        </PageWrapper>
+      <PageWrapper>
+        <div>
+          <Navbar />
+          <main className="container mx-auto p-4 md:p-8">
+            <JobDetailSkeleton />
+          </main>
+        </div>
+      </PageWrapper>
     );
   }
 
   if (error) return <div>Error loading job details.</div>;
-  if (!job) return <div>Job not found.</div>
+  if (!job) return <div>Job not found.</div>;
 
-  const statusData = job.statusCodeCounter ? Object.entries(job.statusCodeCounter).map(([name, value]) => ({ name, count: value as number })) : [];
+  const statusData = job.statusCodeCounter
+    ? Object.entries(job.statusCodeCounter).map(([name, value]) => ({
+        name,
+        count: value as number,
+      }))
+    : [];
 
   return (
     <PageWrapper>
       <div>
-          <Navbar />
-          <main className="p-4 md:p-8">
-              <h1 className="text-3xl font-bold mb-4">Job Details: {job.id}</h1>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-                  <Card>
-                      <CardHeader><CardTitle>Status</CardTitle></CardHeader>
-                      <CardContent>{job.status}</CardContent>
-                  </Card>
-                  <Card>
-                      <CardHeader><CardTitle>Total Requests</CardTitle></CardHeader>
-                      <CardContent>{job.summary?.total_requests ?? 'N/A'}</CardContent>
-                  </Card>
-                  <Card>
-                      <CardHeader><CardTitle>Duration</CardTitle></CardHeader>
-                      <CardContent>{job.summary?.duration_seconds ?? 'N/A'}s</CardContent>
-                  </Card>
-              </div>
+        <Navbar />
+        <main className="container mx-auto p-4 md:p-8">
+          <div className="mb-8">
+            <p className="text-sm text-muted-foreground">Job Details</p>
+            <h1 className="text-3xl font-bold font-mono">{job.id}</h1>
+          </div>
 
-              {job.statusCodeCounter &&
-                  <Card className="mb-8">
-                      <CardHeader><CardTitle>Status Code Distribution</CardTitle></CardHeader>
-                      <CardContent>
-                          <ResponsiveContainer width="100%" height={300}>
-                              <BarChart data={statusData}>
-                                  <CartesianGrid strokeDasharray="3 3" />
-                                  <XAxis dataKey="name" />
-                                  <YAxis />
-                                  <Tooltip />
-                                  <Legend />
-                                  <Bar dataKey="count" fill="#8884d8" />
-                              </BarChart>
-                          </ResponsiveContainer>
-                      </CardContent>
-                  </Card>
-              }
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <Card>
+              <CardHeader>
+                <CardTitle>Status</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Badge>{job.status}</Badge>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Total Requests</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-2xl font-bold">
+                  {job.summary?.total_requests?.toLocaleString() ?? "N/A"}
+                </p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Duration</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-2xl font-bold">
+                  {job.summary?.duration_seconds?.toFixed(2) ?? "N/A"}s
+                </p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Unique Errors</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-2xl font-bold">
+                  {job.uniqueServerErrors?.toLocaleString() ?? "N/A"}
+                </p>
+              </CardContent>
+            </Card>
+          </div>
 
-              <div className="space-y-4">
-                  {job.rawFileUrls?.q_tables && 
-                      <Button asChild><a href={job.rawFileUrls.q_tables} target="_blank" rel="noreferrer">Download Q-Tables</a></Button>
-                  }
-                  {job.rawFileUrls?.server_errors && 
-                      <Button asChild><a href={job.rawFileUrls.server_errors} target="_blank" rel="noreferrer">Download Server Errors</a></Button>
-                  }
-                   {job.rawFileUrls?.successful_requests && 
-                      <Button asChild><a href={job.rawFileUrls.successful_requests} target="_blank" rel="noreferrer">Download Successful Requests</a></Button>
-                  }
-              </div>
-          </main>
+          {job.statusCodeCounter && (
+            <Card className="mb-8">
+              <CardHeader>
+                <CardTitle>Status Code Distribution</CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  A summary of all HTTP status codes returned by the server
+                  during the test.
+                </p>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={350}>
+                  <BarChart data={statusData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="count" fill="hsl(var(--primary))" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          )}
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Raw Data</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Download the raw JSON files generated by the test run.
+              </p>
+            </CardHeader>
+            <CardContent className="flex flex-wrap gap-4">
+              {job.rawFileUrls?.q_tables && (
+                <Button asChild>
+                  <a
+                    href={job.rawFileUrls.q_tables}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Download Q-Tables
+                  </a>
+                </Button>
+              )}
+              {job.rawFileUrls?.server_errors && (
+                <Button asChild>
+                  <a
+                    href={job.rawFileUrls.server_errors}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Download Server Errors
+                  </a>
+                </Button>
+              )}
+              {job.rawFileUrls?.successful_requests && (
+                <Button asChild>
+                  <a
+                    href={job.rawFileUrls.successful_requests}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Download Successful Requests
+                  </a>
+                </Button>
+              )}
+            </CardContent>
+          </Card>
+        </main>
       </div>
     </PageWrapper>
   );
 }
+

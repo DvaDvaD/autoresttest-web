@@ -4,9 +4,11 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { createColumnHelper, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
 import { JobHistorySkeleton } from "@/components/JobHistorySkeleton";
+import { Badge } from "@/components/ui/badge";
+import { motion } from "framer-motion";
 
 const fetchJobs = async () => {
   const response = await fetch("/api/v1/jobs");
@@ -34,6 +36,14 @@ type Job = {
 
 const columnHelper = createColumnHelper<Job>();
 
+const StatusBadge = ({ status }: { status: string }) => {
+  const variant: "default" | "destructive" | "outline" = 
+    status === "completed" ? "default" :
+    status === "failed" || status === "cancelled" ? "destructive" :
+    "outline";
+  return <Badge variant={variant}>{status}</Badge>;
+};
+
 export function JobHistory() {
   const queryClient = useQueryClient();
   const { data: jobs, isLoading } = useQuery<Job[]>({ 
@@ -56,8 +66,8 @@ export function JobHistory() {
   });
 
   const columns = [
-    columnHelper.accessor("id", { header: "Job ID" }),
-    columnHelper.accessor("status", { header: "Status" }),
+    columnHelper.accessor("id", { header: "Job ID", cell: info => <span className="font-mono">{info.getValue().substring(0, 12)}...</span> }),
+    columnHelper.accessor("status", { header: "Status", cell: info => <StatusBadge status={info.getValue()} /> }),
     columnHelper.accessor("createdAt", { header: "Created At", cell: info => new Date(info.getValue()).toLocaleString() }),
     columnHelper.display({
         id: 'actions',
@@ -65,11 +75,11 @@ export function JobHistory() {
         cell: ({ row }) => {
             const job = row.original;
             return (
-                <div className="space-x-2">
-                    <Button asChild disabled={job.status !== 'completed' && job.status !== 'failed'}>
+                <div className="space-x-2 text-right">
+                    <Button asChild variant="ghost" size="sm" disabled={job.status !== 'completed' && job.status !== 'failed'}>
                         <Link href={`/jobs/${job.id}`}>Details</Link>
                     </Button>
-                    <Button variant="destructive" onClick={() => cancelMutation.mutate(job.id)} disabled={job.status !== 'queued' && job.status !== 'running'}>
+                    <Button variant="destructive" size="sm" onClick={() => cancelMutation.mutate(job.id)} disabled={job.status !== 'queued' && job.status !== 'running'}>
                         Cancel
                     </Button>
                 </div>
@@ -88,22 +98,14 @@ export function JobHistory() {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Job History</CardTitle>
-      </CardHeader>
-      <CardContent>
+      <CardContent className="pt-6">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
                   <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
+                    {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                   </TableHead>
                 ))}
               </TableRow>
@@ -112,8 +114,13 @@ export function JobHistory() {
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow
+                <motion.tr
                   key={row.id}
+                  layout
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="hover:bg-muted/50"
                   data-state={row.getIsSelected() && "selected"}
                 >
                   {row.getVisibleCells().map((cell) => (
@@ -121,12 +128,12 @@ export function JobHistory() {
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}
-                </TableRow>
+                </motion.tr>
               ))
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-24 text-center">
-                  No results.
+                  No jobs found. Start a new test to see your history.
                 </TableCell>
               </TableRow>
             )}
