@@ -17,6 +17,7 @@
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "redis": "^5.8.3",
+    "svix": "^1.77.0",
     "zod": "^4.1.12"
   },
   "devDependencies": {

@@ -62,7 +62,7 @@ export async function PATCH(
       error instanceof Error &&
       error.name === "PrismaClientKnownRequestError"
     ) {
-      // @ts-ignore
+      // @ts-expect-error
       if (error.code === "P2025") {
         return NextResponse.json(
           { error: `Job with ID ${job_id} not found.` },

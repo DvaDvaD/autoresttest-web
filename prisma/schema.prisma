@@ -9,7 +9,8 @@ datasource db {
 
 model Job {
   id                    String    @id @default(cuid())
-  userId                String?   @map("user_id")
+  userId                String    @map("user_id")
+  user                  User      @relation(fields: [userId], references: [id])
   status                String    @default("queued")
   statusMessage         String?   @map("status_message")
   progressPercentage      Float?    @map("progress_percentage")
@@ -21,4 +22,10 @@ model Job {
   rawFileUrls           Json?     @map("raw_file_urls")
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
+}
+
+model User {
+  id    String @id
+  email String @unique
+  jobs  Job[]
 }
