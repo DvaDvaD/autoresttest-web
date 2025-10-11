@@ -6,6 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
+import { JobHistorySkeleton } from "@/components/JobHistorySkeleton";
 
 const fetchJobs = async () => {
   const response = await fetch("/api/v1/jobs");
@@ -60,6 +61,7 @@ export function JobHistory() {
     columnHelper.accessor("createdAt", { header: "Created At", cell: info => new Date(info.getValue()).toLocaleString() }),
     columnHelper.display({
         id: 'actions',
+        header: "Actions",
         cell: ({ row }) => {
             const job = row.original;
             return (
@@ -82,7 +84,7 @@ export function JobHistory() {
     getCoreRowModel: getCoreRowModel(),
   });
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) return <JobHistorySkeleton />;
 
   return (
     <Card>
