@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "shadcn": {
+      "command": "https://www.shadcn.io/api/mcp",
+      "args": [],
+      "httpUrl": "https://www.shadcn.io/api/mcp"
+    }
+  }
+}
