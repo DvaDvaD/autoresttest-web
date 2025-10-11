@@ -1,6 +1,6 @@
 export function HeroSection() {
   return (
-    <section className="py-12 text-center">
+    <section className="py-20 text-center">
       <div className="max-w-3xl mx-auto">
         <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
           Intelligent, Automated API Security Testing

@@ -6,20 +6,25 @@ import { Navbar } from "@/components/Navbar";
 
 export default function HomePage() {
   return (
-    <PageWrapper>
+    <>
       <Navbar />
-      <main className="container mx-auto px-4 py-8">
+      <PageWrapper>
         <HeroSection />
 
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-          <div className="lg:col-span-2">
-            <TestForm />
+        <div className="my-8 border-b border-border" />
+        <main className="container mx-auto px-4 py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+            <div className="lg:col-span-2">
+              <h2 className="text-xl font-semibold mb-4">Create a New Test</h2>
+              <TestForm />
+            </div>
+            <div className="lg:col-span-3">
+              <h2 className="text-xl font-semibold mb-4">Job History</h2>
+              <JobHistory />
+            </div>
           </div>
-          <div className="lg:col-span-3">
-            <JobHistory />
-          </div>
-        </div>
-      </main>
-    </PageWrapper>
+        </main>
+      </PageWrapper>
+    </>
   );
 }

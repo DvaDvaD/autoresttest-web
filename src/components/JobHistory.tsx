@@ -105,7 +105,6 @@ export function JobHistory() {
           <div className="space-x-2 text-right">
             <Button
               asChild
-              variant="ghost"
               size="sm"
               disabled={job.status !== "completed" && job.status !== "failed"}
             >
@@ -156,15 +155,7 @@ export function JobHistory() {
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
-                <motion.tr
-                  key={row.id}
-                  layout
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="hover:bg-muted/50"
-                  data-state={row.getIsSelected() && "selected"}
-                >
+                <TableRow key={row.id}>
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
                       {flexRender(
@@ -173,7 +164,7 @@ export function JobHistory() {
                       )}
                     </TableCell>
                   ))}
-                </motion.tr>
+                </TableRow>
               ))
             ) : (
               <TableRow>

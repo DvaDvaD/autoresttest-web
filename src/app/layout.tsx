@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Providers } from "@/components/Providers";
 import { ThemeProvider } from "@/components/ThemeProvider";
-import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import "./globals.css";
 
@@ -19,7 +18,7 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
-        <body>
+        <body className="bg-background">
           <ThemeProvider
             attribute="class"
             defaultTheme="system"
@@ -39,3 +38,4 @@ export default function RootLayout({
     </ClerkProvider>
   );
 }
+
