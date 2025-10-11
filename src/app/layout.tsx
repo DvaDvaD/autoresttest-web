@@ -1,43 +1,38 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Providers } from "@/components/Providers";
 import { ThemeProvider } from "@/components/ThemeProvider";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import { Navbar } from "@/components/Navbar";
+import { Footer } from "@/components/Footer";
+import "./globals.css";
 
 export const metadata: Metadata = {
   title: "AutoRestTest",
-  description: "Automated API Security Testing",
+  description: "Intelligent, Automated API Security Testing",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
-        <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        >
+        <body>
           <ThemeProvider
             attribute="class"
             defaultTheme="system"
             enableSystem
             disableTransitionOnChange
           >
-            <Providers>{children}</Providers>
+            <Providers>
+              <div className="flex flex-col min-h-screen">
+                {/* Navbar is now part of individual pages */}
+                <main className="flex-grow">{children}</main>
+                <Footer />
+              </div>
+            </Providers>
           </ThemeProvider>
         </body>
       </html>

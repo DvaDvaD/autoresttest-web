@@ -47,7 +47,7 @@ export default function JobDetailPage() {
         <div>
           <Navbar />
           <main className="container mx-auto p-4 md:p-8">
-            <JobDetailSkeleton />
+            <JobDetailSkeleton jobId={jobId} />
           </main>
         </div>
       </PageWrapper>
@@ -187,4 +187,3 @@ export default function JobDetailPage() {
     </PageWrapper>
   );
 }
-
