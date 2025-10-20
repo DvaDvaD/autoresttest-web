@@ -165,7 +165,6 @@ export function TestForm() {
                 src={specFile}
                 accept={{
                   "application/json": [".json"],
-                  "application/x-yaml": [".yaml", ".yml"],
                 }}
                 className="flex-1"
               >
@@ -275,4 +274,3 @@ export function TestForm() {
     </form>
   );
 }
-
