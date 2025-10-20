@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Terminal } from "lucide-react";
+import ReactJson from 'react-json-view';
 
 // Type for the grouped data
 type GroupedErrors = Record<string, { parameters: any; body: any }[]>;
@@ -128,16 +129,14 @@ export function ServerErrorsViewer({ url }: { url: string }) {
                               View Full
                             </Button>
                           </DialogTrigger>
-                          <DialogContent className="sm:max-w-2xl">
-                            <DialogHeader>
-                              <DialogTitle>
-                                {operationId} - Error Details
-                              </DialogTitle>
-                            </DialogHeader>
-                            <pre className="mt-2 text-xs bg-muted p-4 rounded-lg max-h-[60vh] overflow-auto">
-                              {JSON.stringify(error, null, 2)}
-                            </pre>
-                          </DialogContent>
+                                                                              <DialogContent className="sm:max-w-2xl">
+                                                                                  <DialogHeader>
+                                                                                      <DialogTitle>{operationId} - Error Details</DialogTitle>
+                                                                                  </DialogHeader>
+                                                                                  <div className="mt-2 bg-muted p-4 rounded-lg max-h-[60vh] overflow-auto">
+                                                                                      <ReactJson src={error} theme="monokai" collapsed={2} name={false} displayDataTypes={false} />
+                                                                                  </div>
+                                                                              </DialogContent>
                         </Dialog>
                       </TableCell>
                     </TableRow>
