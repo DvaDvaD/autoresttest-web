@@ -175,11 +175,12 @@ export function TestForm() {
                   <DialogTrigger asChild>
                     <Button variant="outline">View Spec</Button>
                   </DialogTrigger>
-                  <DialogContent className="sm:max-w-[80vw] max-h-[90vh] overflow-y-auto">
+                  <DialogContent className="flex flex-col sm:max-w-[80vw] max-h-[90vh]">
                     <DialogHeader>
                       <DialogTitle>{specFile?.[0].name ?? "spec"}</DialogTitle>
                     </DialogHeader>
                     <CodeBlock
+                      className="flex-grow overflow-y-auto"
                       value={specLanguage}
                       data={[
                         {

@@ -56,12 +56,19 @@ function findMinMax(obj: any): [number, number] {
 }
 
 function getHeatmapColor(value: number, min: number, max: number): string {
-  if (min === max) return "oklch(0.8 0.05 240)";
-  const ratio = (value - min) / (max - min);
-  const hue = ratio < 0.5 ? 10 + ratio * 2 * 75 : 85 + (ratio - 0.5) * 2 * 65;
-  const lightness = 0.9 - Math.abs(ratio - 0.5) * 0.2;
-  const chroma = 0.15;
-  return `oklch(${lightness} ${chroma} ${hue})`;
+    if (min === max) return 'oklch(0.7 0.05 240)'; // A more neutral, slightly darker grey
+    const ratio = (value - min) / (max - min);
+    
+    // Interpolate from red (10) to yellow (85) to green (150)
+    const hue = ratio < 0.5 ? 10 + ratio * 2 * 75 : 85 + (ratio - 0.5) * 2 * 65;
+    
+    // Adjust lightness: make it lower (darker) overall and less variable
+    const lightness = 0.75 - Math.abs(ratio - 0.5) * 0.3;
+    
+    // Increase chroma (saturation) for more vibrant colors
+    const chroma = 0.2;
+    
+    return `oklch(${lightness.toFixed(3)} ${chroma} ${hue})`;
 }
 
 const HeatmapItem = ({
