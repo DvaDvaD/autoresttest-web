@@ -1,189 +1,92 @@
-"use client";
+'use client';
 
-import { useQuery } from "@tanstack/react-query";
-import { useParams } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from "recharts";
-import { Navbar } from "@/components/Navbar";
-import { PageWrapper } from "@/components/PageWrapper";
-import { JobDetailSkeleton } from "@/components/JobDetailSkeleton";
-import { Badge } from "@/components/ui/badge";
+import { useQuery } from '@tanstack/react-query';
+import { useParams } from 'next/navigation';
+import { JobSummaryHeader } from '@/components/JobSummaryHeader';
+import { KeyMetricsDashboard } from '@/components/KeyMetricsDashboard';
+import { JobDetailsTabs } from '@/components/JobDetailsTabs';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Terminal } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 
-const fetchJob = async (jobId: string) => {
-  const response = await fetch(`/api/v1/jobs/${jobId}`);
-  if (!response.ok) {
-    throw new Error("Failed to fetch job details");
-  }
-  return response.json();
+// Define the type for a single job based on your backend response
+export type Job = {
+  id: string;
+  userId: string;
+  status: string;
+  statusMessage: string | null;
+  progressPercentage: number | null;
+  summary: any; // Using 'any' for now, but a stricter type is better
+  rawFileUrls: any;
+  createdAt: string;
+  updatedAt: string;
 };
 
-export default function JobDetailPage() {
+async function fetchJob(jobId: string): Promise<Job> {
+  const res = await fetch(`/api/v1/jobs/${jobId}`);
+  if (!res.ok) {
+    throw new Error('Network response was not ok');
+  }
+  return res.json();
+}
+
+export default function JobDetailsPage() {
   const params = useParams();
   const jobId = params.jobId as string;
 
-  const {
-    data: job,
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: ["job", jobId],
+  const { data: job, error, isLoading } = useQuery<Job, Error>({
+    queryKey: ['job', jobId],
     queryFn: () => fetchJob(jobId),
-    enabled: !!jobId,
+    enabled: !!jobId, // Only run the query if the jobId is available
   });
 
   if (isLoading) {
+    return <JobDetailsSkeleton />;
+  }
+
+  if (error) {
     return (
-      <PageWrapper>
-        <div>
-          <Navbar />
-          <main className="container mx-auto p-4 md:p-8">
-            <JobDetailSkeleton jobId={jobId} />
-          </main>
-        </div>
-      </PageWrapper>
+      <div className="container mx-auto p-4 sm:p-6 lg:p-8">
+        <Alert variant="destructive">
+          <Terminal className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>Failed to load job details: {error.message}</AlertDescription>
+        </Alert>
+      </div>
     );
   }
 
-  if (error) return <div>Error loading job details.</div>;
-  if (!job) return <div>Job not found.</div>;
-
-  const statusData = job.statusCodeCounter
-    ? Object.entries(job.statusCodeCounter).map(([name, value]) => ({
-        name,
-        count: value as number,
-      }))
-    : [];
+  if (!job) {
+    return null; // Or a 'Not Found' component
+  }
 
   return (
-    <PageWrapper>
-      <div>
-        <Navbar />
-        <main className="container mx-auto p-4 md:p-8">
-          <div className="mb-8">
-            <p className="text-sm text-muted-foreground">Job Details</p>
-            <h1 className="text-3xl font-bold font-mono">{job.id}</h1>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            <Card>
-              <CardHeader>
-                <CardTitle>Status</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Badge>{job.status}</Badge>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle>Total Requests</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-2xl font-bold">
-                  {job.summary?.total_requests?.toLocaleString() ?? "N/A"}
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle>Duration</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-2xl font-bold">
-                  {job.summary?.duration_seconds?.toFixed(2) ?? "N/A"}s
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle>Unique Errors</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-2xl font-bold">
-                  {job.uniqueServerErrors?.toLocaleString() ?? "N/A"}
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-
-          {job.statusCodeCounter && (
-            <Card className="mb-8">
-              <CardHeader>
-                <CardTitle>Status Code Distribution</CardTitle>
-                <p className="text-sm text-muted-foreground">
-                  A summary of all HTTP status codes returned by the server
-                  during the test.
-                </p>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={350}>
-                  <BarChart data={statusData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="count" fill="hsl(var(--primary))" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-          )}
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Raw Data</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Download the raw JSON files generated by the test run.
-              </p>
-            </CardHeader>
-            <CardContent className="flex flex-wrap gap-4">
-              {job.rawFileUrls?.q_tables && (
-                <Button asChild>
-                  <a
-                    href={job.rawFileUrls.q_tables}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    Download Q-Tables
-                  </a>
-                </Button>
-              )}
-              {job.rawFileUrls?.server_errors && (
-                <Button asChild>
-                  <a
-                    href={job.rawFileUrls.server_errors}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    Download Server Errors
-                  </a>
-                </Button>
-              )}
-              {job.rawFileUrls?.successful_requests && (
-                <Button asChild>
-                  <a
-                    href={job.rawFileUrls.successful_requests}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    Download Successful Requests
-                  </a>
-                </Button>
-              )}
-            </CardContent>
-          </Card>
-        </main>
-      </div>
-    </PageWrapper>
+    <div className="container mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
+      <JobSummaryHeader job={job} />
+      <KeyMetricsDashboard summary={job.summary} />
+      <JobDetailsTabs job={job} />
+    </div>
   );
 }
+
+function JobDetailsSkeleton() {
+    return (
+      <div className="container mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
+        {/* Header Skeleton */}
+        <div className="space-y-2">
+            <Skeleton className="h-8 w-3/4" />
+            <Skeleton className="h-4 w-1/2" />
+        </div>
+        {/* Key Metrics Skeleton */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+            <Skeleton className="h-24 w-full" />
+            <Skeleton className="h-24 w-full" />
+            <Skeleton className="h-24 w-full" />
+            <Skeleton className="h-24 w-full" />
+            <Skeleton className="h-24 w-full" />
+        </div>
+        {/* Tabs Skeleton */}
+        <Skeleton className="h-96 w-full" />
+      </div>
+    );
+  }
