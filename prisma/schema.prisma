@@ -8,20 +8,21 @@ datasource db {
 }
 
 model Job {
-  id                    String    @id @default(cuid())
-  userId                String    @map("user_id")
-  user                  User      @relation(fields: [userId], references: [id])
-  status                String    @default("queued")
-  statusMessage         String?   @map("status_message")
-  progressPercentage      Float?    @map("progress_percentage")
-  currentOperation        String?   @map("current_operation")
-  successfulOperations  Int?      @map("successful_operations")
-  uniqueServerErrors    Int?      @map("unique_server_errors")
-  statusCodeCounter     Json?     @map("status_code_counter")
-  summary               Json?
-  rawFileUrls           Json?     @map("raw_file_urls")
-  createdAt             DateTime  @default(now())
-  updatedAt             DateTime  @updatedAt
+  id                   String   @id @default(cuid())
+  userId               String   @map("user_id")
+  user                 User     @relation(fields: [userId], references: [id])
+  status               String   @default("queued")
+  statusMessage        String?  @map("status_message")
+  progressPercentage   Float?   @map("progress_percentage")
+  currentOperation     String?  @map("current_operation")
+  successfulOperations Int?     @map("successful_operations")
+  uniqueServerErrors   Int?     @map("unique_server_errors")
+  statusCodeCounter    Json?    @map("status_code_counter")
+  summary              Json?
+  config               Json?
+  rawFileUrls          Json?    @map("raw_file_urls")
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
 }
 
 model User {

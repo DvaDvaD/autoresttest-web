@@ -62,6 +62,7 @@ export const apiTestRunner = schemaTask({
         data: {
           summary: result.summary,
           rawFileUrls: result.raw_file_urls,
+          config: result.config,
           status: "completed",
         },
       });
