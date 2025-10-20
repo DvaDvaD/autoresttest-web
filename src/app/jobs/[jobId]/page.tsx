@@ -6,6 +6,7 @@ import { JobSummaryHeader } from '@/components/JobSummaryHeader';
 import { KeyMetricsDashboard } from '@/components/KeyMetricsDashboard';
 import { TestConfigDisplay } from '@/components/TestConfigDisplay';
 import { JobDetailsTabs } from '@/components/JobDetailsTabs';
+import { JobDetailsDataExplorer } from '@/components/JobDetailsDataExplorer';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Terminal } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -68,6 +69,7 @@ export default function JobDetailsPage() {
       <KeyMetricsDashboard summary={job.summary} />
       <TestConfigDisplay config={job.config} />
       <JobDetailsTabs job={job} />
+      <JobDetailsDataExplorer job={job} />
     </div>
   );
 }

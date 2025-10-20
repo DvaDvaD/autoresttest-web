@@ -9,10 +9,10 @@ import { RawDataDownloads } from './RawDataDownloads';
 
 export function JobDetailsTabs({ job }: { job: Job }) {
   return (
-    <Tabs defaultValue="status_codes">
+    <Tabs defaultValue="status_codes" className="w-full">
       <TabsList className="grid w-full grid-cols-3">
-        <TabsTrigger value="status_codes">Status Codes</TabsTrigger>
-        <TabsTrigger value="server_errors">Server Errors</TabsTrigger>
+        <TabsTrigger value="status_codes">Status Code Distribution</TabsTrigger>
+        <TabsTrigger value="server_errors">Operations with Server Errors</TabsTrigger>
         <TabsTrigger value="downloads">Downloads</TabsTrigger>
       </TabsList>
       <TabsContent value="status_codes">
