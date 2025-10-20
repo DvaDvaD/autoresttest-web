@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'next/navigation';
 import { JobSummaryHeader } from '@/components/JobSummaryHeader';
 import { KeyMetricsDashboard } from '@/components/KeyMetricsDashboard';
+import { TestConfigDisplay } from '@/components/TestConfigDisplay';
 import { JobDetailsTabs } from '@/components/JobDetailsTabs';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Terminal } from 'lucide-react';
@@ -16,7 +17,8 @@ export type Job = {
   status: string;
   statusMessage: string | null;
   progressPercentage: number | null;
-  summary: any; // Using 'any' for now, but a stricter type is better
+  summary: any; 
+  config: any; 
   rawFileUrls: any;
   createdAt: string;
   updatedAt: string;
@@ -64,6 +66,7 @@ export default function JobDetailsPage() {
     <div className="container mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
       <JobSummaryHeader job={job} />
       <KeyMetricsDashboard summary={job.summary} />
+      <TestConfigDisplay config={job.config} />
       <JobDetailsTabs job={job} />
     </div>
   );
@@ -85,6 +88,8 @@ function JobDetailsSkeleton() {
             <Skeleton className="h-24 w-full" />
             <Skeleton className="h-24 w-full" />
         </div>
+        {/* Config Skeleton */}
+        <Skeleton className="h-48 w-full" />
         {/* Tabs Skeleton */}
         <Skeleton className="h-96 w-full" />
       </div>
