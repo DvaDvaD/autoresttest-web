@@ -1,13 +1,11 @@
 "use client";
 
-import { SparksDriftingShaders } from "@/components/ui/shadcn-io/sparks-drifting-shaders";
-
 export function HeroSection() {
   return (
     <section className="relative py-28 text-center">
-      <div className="absolute inset-0 z-0">
-        <SparksDriftingShaders />
-      </div>
+      {/* <div className="absolute inset-0 z-0"> */}
+      {/*   <SparksDriftingShaders /> */}
+      {/* </div> */}
       <div className="relative z-10 max-w-3xl mx-auto">
         <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
           Intelligent, Automated API Security Testing
@@ -23,4 +21,3 @@ export function HeroSection() {
     </section>
   );
 }
-

@@ -4,6 +4,12 @@
       "command": "https://www.shadcn.io/api/mcp",
       "args": [],
       "httpUrl": "https://www.shadcn.io/api/mcp"
+    },
+    "mindpilot": {
+      "command": "npx",
+      "args": [
+        "@mindpilot/mcp@latest"
+      ]
     }
   }
 }
