@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { fetchJobs, cancelJob, Job } from "@/lib/api";
 import {
   createColumnHelper,
   flexRender,
@@ -19,32 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
 import { JobHistorySkeleton } from "@/components/JobHistorySkeleton";
-import { Badge } from "@/components/ui/badge";
-import { motion } from "framer-motion";
-
-const fetchJobs = async () => {
-  const response = await fetch("/api/v1/jobs");
-  if (!response.ok) {
-    throw new Error("Failed to fetch jobs");
-  }
-  return response.json();
-};
-
-const cancelJob = async (jobId: string) => {
-  const response = await fetch(`/api/v1/jobs/${jobId}/cancel`, {
-    method: "POST",
-  });
-  if (!response.ok) {
-    throw new Error("Failed to cancel job");
-  }
-  return response.json();
-};
-
-type Job = {
-  id: string;
-  status: string;
-  createdAt: string;
-};
+import { Badge } from "./ui/badge";
 
 const columnHelper = createColumnHelper<Job>();
 
@@ -57,7 +33,6 @@ const StatusBadge = ({ status }: { status: string }) => {
         : "outline";
   return <Badge variant={variant}>{status}</Badge>;
 };
-
 export function JobHistory() {
   const queryClient = useQueryClient();
   const { data: jobs, isLoading } = useQuery<Job[]>({
@@ -75,7 +50,7 @@ export function JobHistory() {
   });
 
   const cancelMutation = useMutation({
-    mutationFn: cancelJob,
+    mutationFn: cancelJob, // Use the imported function
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["jobs"] });
     },

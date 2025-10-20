@@ -9,20 +9,14 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Loader2, Terminal } from 'lucide-react';
 import ReactJson from 'react-json-view';
 
-async function fetchData(url: string): Promise<Record<string, any>> {
-    const res = await fetch(url);
-    if (!res.ok) {
-        throw new Error('Network response was not ok');
-    }
-    return res.json();
-}
+import { fetchRawData } from '@/lib/api';
 
 export function GroupedDataViewer({ url, dataKey }: { url: string, dataKey: string }) {
     const [enabled, setEnabled] = useState(false);
 
     const { data, isLoading, isError, error } = useQuery<Record<string, any>>({
         queryKey: [dataKey, url],
-        queryFn: () => fetchData(url),
+        queryFn: () => fetchRawData(url),
         enabled: enabled && !!url,
     });
 

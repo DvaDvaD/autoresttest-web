@@ -203,20 +203,14 @@ const OperationAgentViewer = ({ data }: { data: Record<string, number> }) => {
 
 // --- Main Component ---
 
-async function fetchQTables(url: string): Promise<any> {
-  const res = await fetch(url);
-  if (!res.ok) {
-    throw new Error("Network response was not ok");
-  }
-  return res.json();
-}
+import { fetchRawData } from '@/lib/api';
 
 export function QTablesExplorer({ url }: { url: string }) {
-  const { data, isLoading, isError, error } = useQuery<any>({
-    queryKey: ["qTables", url],
-    queryFn: () => fetchQTables(url),
-    enabled: !!url,
-  });
+    const { data, isLoading, isError, error } = useQuery<any>({
+        queryKey: ['qTables', url],
+        queryFn: () => fetchRawData(url),
+        enabled: !!url,
+    });
 
   const [min, max] = useMemo(
     () => (isLoading || !data ? [0, 0] : findMinMax(data)),

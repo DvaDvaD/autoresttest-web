@@ -35,21 +35,7 @@ import {
   CodeBlockItem,
 } from "@/components/ui/shadcn-io/code-block";
 
-const createJob = async (data: any) => {
-  const response = await fetch("/api/v1/jobs", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data),
-  });
-
-  if (!response.ok) {
-    throw new Error("Failed to create job");
-  }
-
-  return response.json();
-};
+import { createJob } from "@/lib/api";
 
 export function TestForm() {
   const [scanType, setScanType] = useState("quick");

@@ -33,22 +33,16 @@ import ReactJson from "react-json-view";
 // Type for the grouped data
 type GroupedErrors = Record<string, { parameters: any; body: any }[]>;
 
-async function fetchServerErrors(url: string): Promise<Record<string, any[]>> {
-  const res = await fetch(url);
-  if (!res.ok) {
-    throw new Error("Network response was not ok");
-  }
-  return res.json();
-}
+import { fetchRawData } from '@/lib/api';
 
 export function ServerErrorsViewer({ url }: { url: string }) {
   const [enabled, setEnabled] = useState(false);
 
-  const { data, isLoading, isError, error } = useQuery<GroupedErrors>({
-    queryKey: ["serverErrorsGrouped", url],
-    queryFn: () => fetchServerErrors(url),
-    enabled: enabled && !!url,
-  });
+    const { data, isLoading, isError, error } = useQuery<GroupedErrors>({
+        queryKey: ['serverErrorsGrouped', url],
+        queryFn: () => fetchRawData(url),
+        enabled: enabled && !!url,
+    });
 
   if (!enabled) {
     return (

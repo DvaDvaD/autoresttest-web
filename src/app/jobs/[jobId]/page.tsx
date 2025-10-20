@@ -7,31 +7,9 @@ import { KeyMetricsDashboard } from "@/components/KeyMetricsDashboard";
 import { TestConfigDisplay } from "@/components/TestConfigDisplay";
 import { JobDetailsDataExplorer } from "@/components/JobDetailsDataExplorer";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Job, fetchJob } from "@/lib/api";
 import { Terminal, Hourglass, XCircle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-
-// Define the type for a single job based on your backend response
-export type Job = {
-  id: string;
-  userId: string;
-  status: string;
-  statusMessage: string | null;
-  progressPercentage: number | null;
-  currentOperation: string | null;
-  summary: any;
-  config: any;
-  rawFileUrls: any;
-  createdAt: string;
-  updatedAt: string;
-};
-
-async function fetchJob(jobId: string): Promise<Job> {
-  const res = await fetch(`/api/v1/jobs/${jobId}`);
-  if (!res.ok) {
-    throw new Error("Network response was not ok");
-  }
-  return res.json();
-}
 
 const InProgressPlaceholder = () => (
   <div className="flex flex-col items-center justify-center text-center p-10 border-2 border-dashed rounded-lg mt-8">
