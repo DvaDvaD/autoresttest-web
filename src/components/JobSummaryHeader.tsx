@@ -1,3 +1,5 @@
+"use client";
+
 import { Badge } from "@/components/ui/badge";
 import { Job } from "@/app/jobs/[jobId]/page";
 import { Progress } from "@/components/ui/progress";
@@ -57,3 +59,4 @@ export function JobSummaryHeader({ job }: { job: Job }) {
     </div>
   );
 }
+

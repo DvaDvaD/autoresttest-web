@@ -49,15 +49,28 @@ export async function PATCH(
     const validatedData = validationResult.data;
 
     // --- 3. Database Update ---
-    const updatedJob = await prisma.job.update({
-      where: { id: job_id },
+    // Use updateMany to conditionally update the job. This prevents a race condition
+    // where a late progress update could overwrite a final 'failed' or 'cancelled' status.
+    const updateResult = await prisma.job.updateMany({
+      where: {
+        id: job_id,
+        status: {
+          notIn: ["failed", "cancelled", "completed"],
+        },
+      },
       data: {
         ...validatedData,
         status: "running", // Ensure status remains 'running' during progress updates
       },
     });
 
-    return NextResponse.json(updatedJob);
+    if (updateResult.count === 0) {
+        console.log(`Job ${job_id} was already in a terminal state. No progress update applied.`);
+        // Return a success response but indicate that no change was made.
+        return NextResponse.json({ message: "Job is in a terminal state; no update applied." });
+    }
+
+    return NextResponse.json({ message: "Progress updated successfully." });
   } catch (error) {
     // Handle cases where the job might not be found or other DB errors
     if (

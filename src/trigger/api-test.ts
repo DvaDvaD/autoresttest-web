@@ -85,6 +85,25 @@ export const apiTestRunner = schemaTask({
   },
 });
 
+tasks.onFailure(async ({ payload, error }) => {
+  const parsedPayload = payloadSchema.safeParse(payload);
+  if (parsedPayload.success) {
+    const { jobId } = parsedPayload.data;
+    await prisma.job.update({
+      where: { id: jobId },
+      data: {
+        status: "failed",
+        statusMessage: (error as Error).message,
+      },
+    });
+  } else {
+    console.error(
+      "Cancellation hook received a payload that did not match the expected schema.",
+      parsedPayload.error,
+    );
+  }
+});
+
 tasks.onCancel(async ({ ctx, payload }) => {
   console.log(`Run ${ctx.run.id} was cancelled.`);
 
@@ -105,7 +124,10 @@ tasks.onCancel(async ({ ctx, payload }) => {
     // cancelled before the initial job record has replicated.
     await prisma.job.updateMany({
       where: { id: jobId, status: { not: "completed" } },
-      data: { status: "cancelled" },
+      data: {
+        status: "cancelled",
+        statusMessage: "Job was cancelled by user.",
+      },
     });
 
     console.log(`Job ${jobId} status updated to "cancelled".`);
