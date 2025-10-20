@@ -2,11 +2,12 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 
-type RouteParams = { params: { job_id: string } };
+type RouteParams = { params: Promise<{ job_id: string }> };
 
-export async function GET(request: Request, { params }: RouteParams) {
+export async function GET(request: Request, props: RouteParams) {
+  const { job_id: jobId } = await props.params;
+
   try {
-    const { job_id: jobId } = params;
     const { userId } = await auth();
 
     if (!userId) {
@@ -28,7 +29,7 @@ export async function GET(request: Request, { params }: RouteParams) {
 
     return NextResponse.json(job);
   } catch (error) {
-    console.error(`Error fetching job ${params.job_id}:`, error);
+    console.error(`Error fetching job ${jobId}:`, error);
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }

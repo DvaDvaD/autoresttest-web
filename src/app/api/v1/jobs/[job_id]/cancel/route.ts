@@ -3,11 +3,12 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { runs } from "@trigger.dev/sdk/v3";
 
-type RouteParams = { params: { job_id: string } };
+type RouteParams = { params: Promise<{ job_id: string }> };
 
-export async function POST(request: Request, { params }: RouteParams) {
+export async function POST(request: Request, props: RouteParams) {
+  const { job_id: jobId } = await props.params;
+
   try {
-    const { job_id: jobId } = params;
     const { userId } = await auth();
 
     if (!userId) {
@@ -47,8 +48,7 @@ export async function POST(request: Request, { params }: RouteParams) {
       message: "Cancellation request sent successfully.",
     });
   } catch (error) {
-    console.error(`Error cancelling job ${params.job_id}:`, error);
+    console.error(`Error cancelling job ${jobId}:`, error);
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }
-
