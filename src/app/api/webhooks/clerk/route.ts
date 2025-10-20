@@ -16,6 +16,7 @@ type WebhookEvent = {
 };
 
 export async function POST(request: Request) {
+  console.log("Handling Clerk webhook event.");
   const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET;
   if (!WEBHOOK_SECRET) {
     throw new Error(

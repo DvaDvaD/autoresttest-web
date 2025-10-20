@@ -14,6 +14,8 @@ export async function POST(request: Request, { params }: RouteParams) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
+    console.log(`Attempting to cancel job: ${jobId} for user: ${userId}`);
+
     const job = await prisma.job.findFirst({
       where: {
         id: jobId,

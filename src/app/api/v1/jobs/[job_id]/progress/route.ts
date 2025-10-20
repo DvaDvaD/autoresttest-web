@@ -24,6 +24,8 @@ export async function PATCH(
 
   const { job_id } = await props.params;
 
+  console.log(`Received progress update for job: ${job_id}`);
+
   try {
     // --- 2. Payload Validation ---
     const body = await request.json();

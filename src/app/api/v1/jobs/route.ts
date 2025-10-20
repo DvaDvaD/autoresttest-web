@@ -27,6 +27,7 @@ export async function GET(
     if (!userId) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
+    console.log("Fetching job list for user:", userId);
 
     const jobs = await prisma.job.findMany({
       ...jobListQuery,
@@ -47,6 +48,7 @@ export async function POST(request: Request) {
     if (!userId) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
+    console.log("Creating new job for user:", userId);
 
     const body = await request.json();
     const { spec, config } = body;
