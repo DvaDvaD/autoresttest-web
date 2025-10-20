@@ -5,10 +5,9 @@ import { useParams } from 'next/navigation';
 import { JobSummaryHeader } from '@/components/JobSummaryHeader';
 import { KeyMetricsDashboard } from '@/components/KeyMetricsDashboard';
 import { TestConfigDisplay } from '@/components/TestConfigDisplay';
-import { JobDetailsTabs } from '@/components/JobDetailsTabs';
 import { JobDetailsDataExplorer } from '@/components/JobDetailsDataExplorer';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Terminal } from 'lucide-react';
+import { Terminal, Hourglass } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 // Define the type for a single job based on your backend response
@@ -18,6 +17,7 @@ export type Job = {
   status: string;
   statusMessage: string | null;
   progressPercentage: number | null;
+  currentOperation: string | null;
   summary: any; 
   config: any; 
   rawFileUrls: any;
@@ -33,6 +33,14 @@ async function fetchJob(jobId: string): Promise<Job> {
   return res.json();
 }
 
+const InProgressPlaceholder = () => (
+    <div className="flex flex-col items-center justify-center text-center p-10 border-2 border-dashed rounded-lg mt-8">
+        <Hourglass className="h-12 w-12 animate-spin text-muted-foreground mb-4" />
+        <h3 className="text-xl font-semibold">Test in Progress</h3>
+        <p className="text-muted-foreground">The full report will be available here once the job is complete.</p>
+    </div>
+);
+
 export default function JobDetailsPage() {
   const params = useParams();
   const jobId = params.jobId as string;
@@ -40,7 +48,12 @@ export default function JobDetailsPage() {
   const { data: job, error, isLoading } = useQuery<Job, Error>({
     queryKey: ['job', jobId],
     queryFn: () => fetchJob(jobId),
-    enabled: !!jobId, // Only run the query if the jobId is available
+    enabled: !!jobId,
+    refetchInterval: (query) => {
+        const job = query.state.data;
+        // Stop refetching if the job is completed, failed, or cancelled
+        return (job?.status === 'completed' || job?.status === 'failed' || job?.status === 'cancelled') ? false : 5000;
+    },
   });
 
   if (isLoading) {
@@ -63,13 +76,20 @@ export default function JobDetailsPage() {
     return null; // Or a 'Not Found' component
   }
 
+  const isRunning = job.status === 'queued' || job.status === 'running';
+
   return (
     <div className="container mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
       <JobSummaryHeader job={job} />
-      <KeyMetricsDashboard summary={job.summary} />
-      <TestConfigDisplay config={job.config} />
-      <JobDetailsTabs job={job} />
-      <JobDetailsDataExplorer job={job} />
+      {isRunning ? (
+        <InProgressPlaceholder />
+      ) : (
+        <>
+            <KeyMetricsDashboard summary={job.summary} />
+            <TestConfigDisplay config={job.config} />
+            <JobDetailsDataExplorer job={job} />
+        </>
+      )}
     </div>
   );
 }
