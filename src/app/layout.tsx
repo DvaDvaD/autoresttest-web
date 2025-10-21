@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { Footer } from "@/components/Footer";
 import "./globals.css";
 import { Navbar } from "@/components/Navbar";
+import { PageWrapper } from "@/components/PageWrapper";
 
 export const metadata: Metadata = {
   title: "AutoRestTest",
@@ -27,11 +28,13 @@ export default function RootLayout({
             disableTransitionOnChange
           >
             <Providers>
-              <div className="flex flex-col min-h-screen">
-                <Navbar />
-                <main className="flex-grow">{children}</main>
-                <Footer />
-              </div>
+              <PageWrapper>
+                <div className="flex flex-col min-h-screen">
+                  <Navbar />
+                  <main className="flex-grow">{children}</main>
+                  <Footer />
+                </div>
+              </PageWrapper>
             </Providers>
           </ThemeProvider>
         </body>
