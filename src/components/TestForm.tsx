@@ -48,6 +48,11 @@ export function TestForm() {
   const [temperature, setTemperature] = useState([0.7]);
   const [useCachedGraph, setUseCachedGraph] = useState(false);
   const [useCachedQTables, setUseCachedQTables] = useState(false);
+  const [learningRate, setLearningRate] = useState([0.1]);
+  const [discountFactor, setDiscountFactor] = useState([0.9]);
+  const [maxExploration, setMaxExploration] = useState([1]);
+  const [duration, setDuration] = useState(60);
+  const [mutationRate, setMutationRate] = useState([0.1]);
 
   const queryClient = useQueryClient();
 
@@ -87,6 +92,11 @@ export function TestForm() {
       llm_engine_temperature: temperature[0],
       use_cached_graph: useCachedGraph,
       use_cached_q_tables: useCachedQTables,
+      rl_agent_learning_rate: learningRate[0],
+      rl_agent_discount_factor: discountFactor[0],
+      rl_agent_max_exploration: maxExploration[0],
+      time_duration_seconds: duration,
+      mutation_rate: mutationRate[0],
     };
     mutation.mutate({ spec, config });
   };
@@ -101,23 +111,6 @@ export function TestForm() {
           </p>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label>Scan Type</Label>
-            <RadioGroup
-              value={scanType}
-              onValueChange={setScanType}
-              className="flex space-x-4"
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="quick" id="quick" />
-                <Label htmlFor="quick">Quick</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="deep" id="deep" />
-                <Label htmlFor="deep">Deep</Label>
-              </div>
-            </RadioGroup>
-          </div>
           <div className="space-y-2">
             <Label>Test Type</Label>
             <RadioGroup
@@ -251,6 +244,71 @@ export function TestForm() {
               onCheckedChange={(checked) => setUseCachedQTables(!!checked)}
             />
             <Label htmlFor="cachedQTables">Use Cached Q-Tables</Label>
+          </div>
+          <div className="space-y-2 pt-4">
+            <Label htmlFor="duration">Test Duration (seconds)</Label>
+            <Input
+              id="duration"
+              type="number"
+              value={duration}
+              onChange={(e) => setDuration(parseInt(e.target.value, 10))}
+            />
+          </div>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label>RL Learning Rate</Label>
+              <span className="text-sm text-muted-foreground">
+                {learningRate[0]}
+              </span>
+            </div>
+            <Slider
+              value={learningRate}
+              onValueChange={setLearningRate}
+              max={1}
+              step={0.01}
+            />
+          </div>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label>RL Discount Factor</Label>
+              <span className="text-sm text-muted-foreground">
+                {discountFactor[0]}
+              </span>
+            </div>
+            <Slider
+              value={discountFactor}
+              onValueChange={setDiscountFactor}
+              max={1}
+              step={0.01}
+            />
+          </div>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label>RL Max Exploration</Label>
+              <span className="text-sm text-muted-foreground">
+                {maxExploration[0]}
+              </span>
+            </div>
+            <Slider
+              value={maxExploration}
+              onValueChange={setMaxExploration}
+              max={1}
+              step={0.01}
+            />
+          </div>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label>Mutation Rate</Label>
+              <span className="text-sm text-muted-foreground">
+                {mutationRate[0]}
+              </span>
+            </div>
+            <Slider
+              value={mutationRate}
+              onValueChange={setMutationRate}
+              max={1}
+              step={0.01}
+            />
           </div>
         </CardContent>
       </Card>
