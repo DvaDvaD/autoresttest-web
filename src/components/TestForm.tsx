@@ -106,9 +106,6 @@ export function TestForm() {
       <Card>
         <CardHeader>
           <CardTitle>Test Options</CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Select the type and scope of your test.
-          </p>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
@@ -127,6 +124,10 @@ export function TestForm() {
                 <Label htmlFor="ci">GitHub CI (soon)</Label>
               </div>
             </RadioGroup>
+            <p className="text-xs text-muted-foreground pt-1">
+              Choose 'One Time' for a single test run or 'GitHub CI' to set up
+              automated testing in your repository.
+            </p>
           </div>
         </CardContent>
       </Card>
@@ -184,6 +185,10 @@ export function TestForm() {
                 </Dialog>
               )}
             </div>
+            <p className="text-xs text-muted-foreground pt-1">
+              Upload the OpenAPI (Swagger) specification file for the API you
+              want to test. JSON format is preferred.
+            </p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="apiUrl">API URL Override (Optional)</Label>
@@ -193,6 +198,10 @@ export function TestForm() {
               onChange={(e) => setApiUrl(e.target.value)}
               placeholder="https://api.example.com"
             />
+            <p className="text-xs text-muted-foreground pt-1">
+              Test against a different environment by providing a new base URL
+              (e.g., a staging server).
+            </p>
           </div>
         </CardContent>
       </Card>
@@ -214,6 +223,9 @@ export function TestForm() {
                 <SelectItem value="claude-2">Claude 2</SelectItem>
               </SelectContent>
             </Select>
+            <p className="text-xs text-muted-foreground pt-1">
+              The underlying model used for generating test cases.
+            </p>
           </div>
           <div className="space-y-2">
             <div className="flex items-center justify-between">
@@ -228,24 +240,40 @@ export function TestForm() {
               max={1}
               step={0.1}
             />
+            <p className="text-xs text-muted-foreground pt-1">
+              Lower values are more deterministic; higher values are more
+              creative.
+            </p>
           </div>
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="cachedGraph"
-              checked={useCachedGraph}
-              onCheckedChange={(checked) => setUseCachedGraph(!!checked)}
-            />
-            <Label htmlFor="cachedGraph">Use Cached Graph</Label>
+          <div>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="cachedGraph"
+                checked={useCachedGraph}
+                onCheckedChange={(checked) => setUseCachedGraph(!!checked)}
+              />
+              <Label htmlFor="cachedGraph">Use Cached Graph</Label>
+            </div>
+            <p className="text-xs text-muted-foreground pt-1 pl-6">
+              Speeds up tests by reusing the previously generated API dependency
+              graph.
+            </p>
           </div>
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="cachedQTables"
-              checked={useCachedQTables}
-              onCheckedChange={(checked) => setUseCachedQTables(!!checked)}
-            />
-            <Label htmlFor="cachedQTables">Use Cached Q-Tables</Label>
+          <div>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="cachedQTables"
+                checked={useCachedQTables}
+                onCheckedChange={(checked) => setUseCachedQTables(!!checked)}
+              />
+              <Label htmlFor="cachedQTables">Use Cached Q-Tables</Label>
+            </div>
+            <p className="text-xs text-muted-foreground pt-1 pl-6">
+              Speeds up tests by reusing the agent's previously learned
+              knowledge.
+            </p>
           </div>
-          <div className="space-y-2 pt-4">
+          <div className="space-y-2">
             <Label htmlFor="duration">Test Duration (seconds)</Label>
             <Input
               id="duration"
@@ -253,6 +281,10 @@ export function TestForm() {
               value={duration}
               onChange={(e) => setDuration(parseInt(e.target.value, 10))}
             />
+            <p className="text-xs text-muted-foreground pt-1">
+              The total time allocated for the test run (not including the time
+              needed to generate the API graph and Q-tables.)
+            </p>
           </div>
           <div className="space-y-2">
             <div className="flex items-center justify-between">
@@ -267,6 +299,10 @@ export function TestForm() {
               max={1}
               step={0.01}
             />
+            <p className="text-xs text-muted-foreground pt-1">
+              The rate at which the reinforcement learning agent learns from new
+              information.
+            </p>
           </div>
           <div className="space-y-2">
             <div className="flex items-center justify-between">
@@ -281,6 +317,10 @@ export function TestForm() {
               max={1}
               step={0.01}
             />
+            <p className="text-xs text-muted-foreground pt-1">
+              Determines how much the agent prioritizes future rewards over
+              immediate ones.
+            </p>
           </div>
           <div className="space-y-2">
             <div className="flex items-center justify-between">
@@ -295,6 +335,10 @@ export function TestForm() {
               max={1}
               step={0.01}
             />
+            <p className="text-xs text-muted-foreground pt-1">
+              The probability that the agent will explore new actions rather
+              than exploit known ones.
+            </p>
           </div>
           <div className="space-y-2">
             <div className="flex items-center justify-between">
@@ -309,6 +353,10 @@ export function TestForm() {
               max={1}
               step={0.01}
             />
+            <p className="text-xs text-muted-foreground pt-1">
+              The probability of random changes being introduced during test
+              generation.
+            </p>
           </div>
         </CardContent>
       </Card>
