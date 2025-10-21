@@ -43,6 +43,7 @@ export function TestForm() {
   const [spec, setSpec] = useState("");
   const [specFile, setSpecFile] = useState<File[] | undefined>();
   const [specLanguage, setSpecLanguage] = useState("yaml");
+  const [specIsTouched, setSpecIsTouched] = useState(false);
   const [apiUrl, setApiUrl] = useState("");
   const [llmEngine, setLlmEngine] = useState("gpt-4");
   const [temperature, setTemperature] = useState([0.7]);
@@ -64,6 +65,7 @@ export function TestForm() {
   });
 
   const handleFileDrop = (acceptedFiles: File[]) => {
+    setSpecIsTouched(true);
     if (acceptedFiles.length > 0) {
       const file = acceptedFiles[0];
       setSpecFile(acceptedFiles);
@@ -86,6 +88,11 @@ export function TestForm() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setSpecIsTouched(true);
+
+    if (!spec) {
+      return; // Block submission if spec is empty
+    }
     const config = {
       api_url_override: apiUrl,
       llm_engine: llmEngine,
@@ -146,7 +153,7 @@ export function TestForm() {
                 accept={{
                   "application/json": [".json"],
                 }}
-                className="flex-1"
+                className={`flex-1 ${!spec && specIsTouched && "border !border-destructive"}`}
               >
                 {specFile ? <DropzoneContent /> : <DropzoneEmptyState />}
               </Dropzone>
@@ -189,6 +196,11 @@ export function TestForm() {
               Upload the OpenAPI (Swagger) specification file for the API you
               want to test. JSON format is preferred.
             </p>
+            {specIsTouched && !spec && (
+              <p className="text-xs text-destructive">
+                Specification file is required.
+              </p>
+            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="apiUrl">API URL Override (Optional)</Label>
