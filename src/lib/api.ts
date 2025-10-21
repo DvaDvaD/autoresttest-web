@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 // A central file for all API-related functions.
 
@@ -11,8 +11,8 @@ export type Job = {
   statusMessage: string | null;
   progressPercentage: number | null;
   currentOperation: string | null;
-  summary: any; 
-  config: any; 
+  summary: any;
+  config: any;
   rawFileUrls: any;
   createdAt: string;
   updatedAt: string;
@@ -28,7 +28,9 @@ export async function fetchJob(jobId: string): Promise<Job> {
   if (!res.ok) {
     // You can add more specific error handling here if needed
     const errorBody = await res.text();
-    throw new Error(`Network response was not ok: ${res.statusText} - ${errorBody}`);
+    throw new Error(
+      `Network response was not ok: ${res.statusText} - ${errorBody}`,
+    );
   }
   return res.json();
 }
@@ -37,11 +39,11 @@ export async function fetchJob(jobId: string): Promise<Job> {
  * Fetches the list of all jobs for the current user.
  */
 export async function fetchJobs(): Promise<Job[]> {
-    const res = await fetch('/api/v1/jobs');
-    if (!res.ok) {
-        throw new Error('Failed to fetch job history');
-    }
-    return res.json();
+  const res = await fetch("/api/v1/jobs");
+  if (!res.ok) {
+    throw new Error("Failed to fetch job history");
+  }
+  return res.json();
 }
 
 /**
@@ -49,19 +51,19 @@ export async function fetchJobs(): Promise<Job[]> {
  * @param data The job creation payload (spec and config).
  */
 export async function createJob(data: any): Promise<{ jobId: string }> {
-    const response = await fetch("/api/v1/jobs", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-    });
-    
-    if (!response.ok) {
-        throw new Error("Failed to create job");
-    }
-    
-    return response.json();
+  const response = await fetch("/api/v1/jobs", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to create job");
+  }
+
+  return response.json();
 }
 
 /**
@@ -69,16 +71,16 @@ export async function createJob(data: any): Promise<{ jobId: string }> {
  * @param jobId The ID of the job to cancel.
  */
 export async function cancelJob(jobId: string): Promise<{ message: string }> {
-    const response = await fetch(`/api/v1/jobs/${jobId}/cancel`, {
-        method: "POST",
-    });
+  const response = await fetch(`/api/v1/jobs/${jobId}/cancel`, {
+    method: "POST",
+  });
 
-    if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to cancel job");
-    }
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || "Failed to cancel job");
+  }
 
-    return response.json();
+  return response.json();
 }
 
 /**
@@ -86,10 +88,30 @@ export async function cancelJob(jobId: string): Promise<{ message: string }> {
  * @param url The URL of the file to fetch.
  */
 export async function fetchRawData<T>(url: string): Promise<T> {
-    const res = await fetch(url);
-    if (!res.ok) {
-        throw new Error('Network response was not ok');
-    }
-    return res.json() as Promise<T>;
+  const res = await fetch(url);
+  if (!res.ok) {
+    throw new Error("Network response was not ok");
+  }
+  return res.json() as Promise<T>;
 }
 
+/**
+ * Sets up CI workflow in the specified repository.
+ * @param data The CI setup payload.
+ */
+export async function setupCI(data: {
+  repository: string;
+  specPath: string;
+  apiKeyName: string;
+}) {
+  const response = await fetch("/api/v1/ci-setup", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || "Failed to set up CI workflow.");
+  }
+  return response.json();
+}

@@ -6,6 +6,7 @@ import { Footer } from "@/components/Footer";
 import "./globals.css";
 import { Navbar } from "@/components/Navbar";
 import { PageWrapper } from "@/components/PageWrapper";
+import { Toaster } from "@/components/ui/sonner";
 
 export const metadata: Metadata = {
   title: "AutoRestTest",
@@ -33,6 +34,7 @@ export default function RootLayout({
                   <Navbar />
                   <main className="flex-grow">{children}</main>
                   <Footer />
+                  <Toaster richColors />
                 </div>
               </PageWrapper>
             </Providers>

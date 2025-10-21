@@ -23,9 +23,10 @@ export const payloadSchema = z.object({
 
 // Schema for validating the CI setup request
 export const ciSetupSchema = configSchema.extend({
-    repository: z.string().min(1, "Repository name is required."),
-    specPath: z.string().min(1, "Spec file path is required."),
-    apiKeyName: z.string().min(1, "API Key Secret Name is required."),
+  repository: z.string().min(1, "Repository name is required."),
+  specPath: z.string().min(1, "Spec file path is required."),
+  apiKeyName: z.string().min(1, "API Key Secret Name is required."),
+  spec_file_content: z.string().optional(), // Optional here as spec might not be provided in CI setup
 });
 
 // Define the Zod schema for progress updates. All fields are optional.

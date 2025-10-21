@@ -38,14 +38,17 @@ jobs:
 `;
 
 export async function POST(request: Request) {
+  console.log("CI Setup endpoint hit.");
   const { userId } = await auth();
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const body = await request.json();
+  console.log("Request body:", body);
   const validationResult = ciSetupSchema.safeParse(body);
 
+  console.log("Validation result:", validationResult);
   if (!validationResult.success) {
     return NextResponse.json(
       { error: "Invalid input.", details: validationResult.error.flatten() },
@@ -56,7 +59,6 @@ export async function POST(request: Request) {
   const { repository, specPath, apiKeyName } = validationResult.data;
 
   try {
-    // Get the user's GitHub OAuth token from Clerk
     const clerk = await clerkClient();
     const clerkResponse = clerk.users.getUserOauthAccessToken(
       userId,
@@ -66,18 +68,19 @@ export async function POST(request: Request) {
     const githubToken = tokenData.data[0]?.token;
 
     if (!githubToken) {
+      console.error("GitHub token not found for user:", userId);
       return NextResponse.json(
         { error: "GitHub account not connected or token not found." },
         { status: 400 },
       );
     }
+    console.log("Successfully retrieved GitHub token.");
 
     const octokit = new Octokit({ auth: githubToken });
 
     const [owner, repo] = repository.split("/");
     const workflowContent = generateWorkflowYaml(apiKeyName, specPath);
 
-    // Check if the file already exists to get its SHA
     let existingFileSha: string | undefined;
     try {
       const { data: existingFile } = await octokit.repos.getContent({
@@ -89,18 +92,20 @@ export async function POST(request: Request) {
         existingFileSha = existingFile.sha;
       }
     } catch (error: any) {
-      if (error.status !== 404) throw error; // Ignore 404 (file not found), re-throw others
+      if (error.status !== 404) throw error;
     }
 
+    console.log(`Attempting to create/update workflow in ${repository}`);
     await octokit.repos.createOrUpdateFileContents({
       owner,
       repo,
       path: ".github/workflows/autoresttest.yml",
       message: "ci: Add AutoRestTest workflow",
       content: Buffer.from(workflowContent).toString("base64"),
-      sha: existingFileSha, // Provide SHA if updating
+      sha: existingFileSha,
     });
 
+    console.log("Workflow file created/updated successfully.");
     return NextResponse.json({ message: "Workflow created successfully!" });
   } catch (error: any) {
     console.error("CI Setup Error:", error);

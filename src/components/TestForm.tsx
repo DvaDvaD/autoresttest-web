@@ -14,7 +14,13 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import {
   Dialog,
@@ -34,17 +40,23 @@ import {
   CodeBlockContent,
   CodeBlockItem,
 } from "@/components/ui/shadcn-io/code-block";
-
-import { createJob } from "@/lib/api";
+import { createJob, setupCI } from "@/lib/api";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 export function TestForm() {
-  const [scanType, setScanType] = useState("quick");
   const [testType, setTestType] = useState("one-time");
+  // State for One-Time Test
   const [spec, setSpec] = useState("");
   const [specFile, setSpecFile] = useState<File[] | undefined>();
   const [specLanguage, setSpecLanguage] = useState("yaml");
   const [specIsTouched, setSpecIsTouched] = useState(false);
   const [apiUrl, setApiUrl] = useState("");
+  // State for CI Setup
+  const [repo, setRepo] = useState("");
+  const [specPath, setSpecPath] = useState("swagger.json");
+  const [apiKeyName, setApiKeyName] = useState("AUTORESTTEST_API_KEY");
+  // Universal Advanced Settings
   const [llmEngine, setLlmEngine] = useState("gpt-4");
   const [temperature, setTemperature] = useState([0.7]);
   const [useCachedGraph, setUseCachedGraph] = useState(false);
@@ -57,10 +69,29 @@ export function TestForm() {
 
   const queryClient = useQueryClient();
 
-  const mutation = useMutation({
+  const oneTimeJobMutation = useMutation({
     mutationFn: createJob,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["jobs"] });
+      toast.success("Job Created!", {
+        description: "Your test is now running.",
+      });
+    },
+    onError: (error) => {
+      toast.error("Failed to Create Job", { description: error.message });
+    },
+  });
+
+  const ciSetupMutation = useMutation({
+    mutationFn: setupCI,
+    onSuccess: () => {
+      toast.success("Workflow Created!", {
+        description:
+          "The autoresttest.yml workflow has been committed to your repository.",
+      });
+    },
+    onError: (error) => {
+      toast.error("Setup Failed", { description: error.message });
     },
   });
 
@@ -69,32 +100,17 @@ export function TestForm() {
     if (acceptedFiles.length > 0) {
       const file = acceptedFiles[0];
       setSpecFile(acceptedFiles);
-
       const extension = file.name.split(".").pop()?.toLowerCase();
-      if (extension === "json") {
-        setSpecLanguage("json");
-      } else {
-        setSpecLanguage("yaml");
-      }
-
+      setSpecLanguage(extension === "json" ? "json" : "yaml");
       const reader = new FileReader();
-      reader.onload = (e) => {
-        const content = e.target?.result as string;
-        setSpec(content);
-      };
+      reader.onload = (e) => setSpec(e.target?.result as string);
       reader.readAsText(file);
     }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setSpecIsTouched(true);
-
-    if (!spec) {
-      return; // Block submission if spec is empty
-    }
-    const config = {
-      api_url_override: apiUrl,
+    const sharedConfig = {
       llm_engine: llmEngine,
       llm_engine_temperature: temperature[0],
       use_cached_graph: useCachedGraph,
@@ -105,124 +121,191 @@ export function TestForm() {
       time_duration_seconds: duration,
       mutation_rate: mutationRate[0],
     };
-    mutation.mutate({ spec, config });
+
+    if (testType === "one-time") {
+      setSpecIsTouched(true);
+      if (!spec) return;
+      const config = {
+        ...sharedConfig,
+        api_url_override: apiUrl,
+      };
+      oneTimeJobMutation.mutate({ spec, config });
+    } else if (testType === "ci-setup") {
+      if (!repo) {
+        toast.error("Validation Error", {
+          description: "Repository name is required.",
+        });
+        return;
+      }
+      ciSetupMutation.mutate({
+        repository: repo,
+        specPath,
+        apiKeyName,
+        ...sharedConfig,
+      });
+    }
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Test Options</CardTitle>
+          <CardTitle>Test Type</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label>Test Type</Label>
-            <RadioGroup
-              value={testType}
-              onValueChange={setTestType}
-              className="flex space-x-4"
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="one-time" id="one-time" />
-                <Label htmlFor="one-time">One Time</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="ci" id="ci" disabled />
-                <Label htmlFor="ci">GitHub CI (soon)</Label>
-              </div>
-            </RadioGroup>
-            <p className="text-xs text-muted-foreground pt-1">
-              Choose 'One Time' for a single test run or 'GitHub CI' to set up
-              automated testing in your repository.
-            </p>
-          </div>
+        <CardContent>
+          <RadioGroup
+            value={testType}
+            onValueChange={setTestType}
+            className="flex space-x-4"
+          >
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="one-time" id="one-time" />
+              <Label htmlFor="one-time">One-Time Test</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="ci-setup" id="ci-setup" />
+              <Label htmlFor="ci-setup">GitHub CI Setup</Label>
+            </div>
+          </RadioGroup>
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Core Configuration</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="spec">OpenAPI Specification</Label>
-            <div className="flex flex-col gap-2">
-              <Dropzone
-                onDrop={handleFileDrop}
-                src={specFile}
-                accept={{
-                  "application/json": [".json"],
-                }}
-                className={`flex-1 ${!spec && specIsTouched && "border !border-destructive"}`}
-              >
-                {specFile ? <DropzoneContent /> : <DropzoneEmptyState />}
-              </Dropzone>
-              {spec && (
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button variant="outline">View Spec</Button>
-                  </DialogTrigger>
-                  <DialogContent className="flex flex-col sm:max-w-[80vw] max-h-[90vh]">
-                    <DialogHeader>
-                      <DialogTitle>{specFile?.[0].name ?? "spec"}</DialogTitle>
-                    </DialogHeader>
-                    <CodeBlock
-                      className="flex-grow overflow-y-auto"
-                      value={specLanguage}
-                      data={[
-                        {
-                          language: specLanguage,
-                          code: spec,
-                          filename: specFile?.[0].name ?? "spec",
-                        },
-                      ]}
-                    >
-                      <CodeBlockBody>
-                        {(item) => (
-                          <CodeBlockItem
-                            key={item.filename}
-                            value={item.language}
-                          >
-                            <CodeBlockContent>{item.code}</CodeBlockContent>
-                          </CodeBlockItem>
-                        )}
-                      </CodeBlockBody>
-                    </CodeBlock>
-                  </DialogContent>
-                </Dialog>
+      {testType === "one-time" ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>Core Configuration</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="spec">OpenAPI Specification</Label>
+              <div className="flex flex-col gap-2">
+                <Dropzone
+                  onDrop={handleFileDrop}
+                  src={specFile}
+                  accept={{ "application/json": [".json"] }}
+                  className={`flex-1 ${!spec && specIsTouched && "border !border-destructive"}`}
+                >
+                  {specFile ? <DropzoneContent /> : <DropzoneEmptyState />}
+                </Dropzone>
+                {spec && (
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button variant="outline">View Spec</Button>
+                    </DialogTrigger>
+                    <DialogContent className="flex flex-col sm:max-w-[80vw] max-h-[90vh]">
+                      <DialogHeader>
+                        <DialogTitle>
+                          {specFile?.[0].name ?? "spec"}
+                        </DialogTitle>
+                      </DialogHeader>
+                      <CodeBlock
+                        className="flex-grow overflow-y-auto"
+                        value={specLanguage}
+                        data={[
+                          {
+                            language: specLanguage,
+                            code: spec,
+                            filename: specFile?.[0].name ?? "spec",
+                          },
+                        ]}
+                      >
+                        <CodeBlockBody>
+                          {(item) => (
+                            <CodeBlockItem
+                              key={item.filename}
+                              value={item.language}
+                            >
+                              <CodeBlockContent>{item.code}</CodeBlockContent>
+                            </CodeBlockItem>
+                          )}
+                        </CodeBlockBody>
+                      </CodeBlock>
+                    </DialogContent>
+                  </Dialog>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground pt-1">
+                Upload the OpenAPI (Swagger) specification file for the API you
+                want to test. JSON format is preferred.
+              </p>
+              {specIsTouched && !spec && (
+                <p className="text-xs text-destructive">
+                  Specification file is required.
+                </p>
               )}
             </div>
-            <p className="text-xs text-muted-foreground pt-1">
-              Upload the OpenAPI (Swagger) specification file for the API you
-              want to test. JSON format is preferred.
-            </p>
-            {specIsTouched && !spec && (
-              <p className="text-xs text-destructive">
-                Specification file is required.
+            <div className="space-y-2">
+              <Label htmlFor="apiUrl">API URL Override (Optional)</Label>
+              <Input
+                id="apiUrl"
+                value={apiUrl}
+                onChange={(e) => setApiUrl(e.target.value)}
+                placeholder="https://api.example.com"
+              />
+              <p className="text-xs text-muted-foreground pt-1">
+                Test against a different environment by providing a new base URL
+                (e.g., a staging server).
               </p>
-            )}
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="apiUrl">API URL Override (Optional)</Label>
-            <Input
-              id="apiUrl"
-              value={apiUrl}
-              onChange={(e) => setApiUrl(e.target.value)}
-              placeholder="https://api.example.com"
-            />
-            <p className="text-xs text-muted-foreground pt-1">
-              Test against a different environment by providing a new base URL
-              (e.g., a staging server).
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <CardHeader>
+            <CardTitle>CI Configuration</CardTitle>
+            <CardDescription>
+              Please ensure you are logged in with the GitHub account you wish
+              to integrate with. This will create a{" "}
+              <code>.github/workflows/autoresttest.yml</code> file in the
+              specified repository.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="repo">Repository Name</Label>
+              <Input
+                id="repo"
+                value={repo}
+                onChange={(e) => setRepo(e.target.value)}
+                placeholder="owner/repo-name"
+              />
+              <p className="text-xs text-muted-foreground pt-1">
+                Provide the full name of the repository where you want to set up
+                the workflow.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="specPath">Path to Spec File</Label>
+              <Input
+                id="specPath"
+                value={specPath}
+                onChange={(e) => setSpecPath(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground pt-1">
+                The path to the OpenAPI file from the root of your repository.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="apiKeyName">API Key Secret Name</Label>
+              <Input
+                id="apiKeyName"
+                value={apiKeyName}
+                onChange={(e) => setApiKeyName(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground pt-1">
+                The name of the GitHub Actions secret that will store your
+                AutoRestTest API key.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardHeader>
           <CardTitle>Advanced Settings</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="llmEngine">LLM Engine</Label>
             <Select value={llmEngine} onValueChange={setLlmEngine}>
@@ -373,9 +456,33 @@ export function TestForm() {
         </CardContent>
       </Card>
 
-      <Button type="submit" disabled={mutation.isPending} className="w-full">
-        {mutation.isPending ? "Creating Job..." : "Create Job"}
+      <Button
+        type="submit"
+        disabled={
+          testType === "one-time"
+            ? oneTimeJobMutation.isPending
+            : ciSetupMutation.isPending
+        }
+        className="w-full"
+      >
+        {testType === "one-time" ? (
+          oneTimeJobMutation.isPending ? (
+            "Creating Job..."
+          ) : (
+            "Create Job"
+          )
+        ) : (
+          <>
+            <Loader2
+              className={`mr-2 h-4 w-4 ${ciSetupMutation.isPending ? "animate-spin" : "hidden"}`}
+            />{" "}
+            {ciSetupMutation.isPending
+              ? "Setting Up Workflow..."
+              : "Setup Workflow"}
+          </>
+        )}
       </Button>
     </form>
   );
 }
+
