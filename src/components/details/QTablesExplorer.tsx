@@ -56,19 +56,19 @@ function findMinMax(obj: any): [number, number] {
 }
 
 function getHeatmapColor(value: number, min: number, max: number): string {
-    if (min === max) return 'oklch(0.7 0.05 240)'; // A more neutral, slightly darker grey
-    const ratio = (value - min) / (max - min);
-    
-    // Interpolate from red (10) to yellow (85) to green (150)
-    const hue = ratio < 0.5 ? 10 + ratio * 2 * 75 : 85 + (ratio - 0.5) * 2 * 65;
-    
-    // Adjust lightness: make it lower (darker) overall and less variable
-    const lightness = 0.75 - Math.abs(ratio - 0.5) * 0.3;
-    
-    // Increase chroma (saturation) for more vibrant colors
-    const chroma = 0.2;
-    
-    return `oklch(${lightness.toFixed(3)} ${chroma} ${hue})`;
+  if (min === max) return "oklch(0.7 0.05 240)"; // A more neutral, slightly darker grey
+  const ratio = (value - min) / (max - min);
+
+  // Interpolate from red (10) to yellow (85) to green (150)
+  const hue = ratio < 0.5 ? 10 + ratio * 2 * 75 : 85 + (ratio - 0.5) * 2 * 65;
+
+  // Adjust lightness: make it lower (darker) overall and less variable
+  const lightness = 0.75 - Math.abs(ratio - 0.5) * 0.3;
+
+  // Increase chroma (saturation) for more vibrant colors
+  const chroma = 0.2;
+
+  return `oklch(${lightness.toFixed(3)} ${chroma} ${hue})`;
 }
 
 const HeatmapItem = ({
@@ -112,6 +112,14 @@ const ValueAgentTable = ({ data }: { data: [any, number][] }) => {
                   collapsed={true}
                   name={false}
                   displayDataTypes={false}
+                  enableClipboard={(copy) => {
+                    // This function runs immediately when user clicks "copy"
+                    const text =
+                      typeof copy === "string"
+                        ? copy
+                        : JSON.stringify(copy, null, 2);
+                    navigator.clipboard.writeText(text).catch(console.error);
+                  }}
                 />
               </TableCell>
               <TableCell
@@ -203,14 +211,14 @@ const OperationAgentViewer = ({ data }: { data: Record<string, number> }) => {
 
 // --- Main Component ---
 
-import { fetchRawData } from '@/lib/api';
+import { fetchRawData } from "@/lib/api";
 
 export function QTablesExplorer({ url }: { url: string }) {
-    const { data, isLoading, isError, error } = useQuery<any>({
-        queryKey: ['qTables', url],
-        queryFn: () => fetchRawData(url),
-        enabled: !!url,
-    });
+  const { data, isLoading, isError, error } = useQuery<any>({
+    queryKey: ["qTables", url],
+    queryFn: () => fetchRawData(url),
+    enabled: !!url,
+  });
 
   const [min, max] = useMemo(
     () => (isLoading || !data ? [0, 0] : findMinMax(data)),
