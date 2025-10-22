@@ -44,17 +44,32 @@ export async function GET(
 // --- POST Handler for Creating Jobs ---
 export async function POST(request: Request) {
   try {
+    const authToken = request.headers.get("Authorization");
+    const internalApiKey = process.env.INTERNAL_API_KEY;
     const { userId } = await auth();
-    if (!userId) {
+
+    if (!internalApiKey) {
+      console.error("INTERNAL_API_KEY is not set.");
+      return NextResponse.json(
+        { error: "Internal server configuration error." },
+        { status: 500 },
+      );
+    }
+
+    console.log("Auth Token:", authToken);
+    const isMachine = authToken === `Bearer ${internalApiKey}`;
+    if (!userId && !isMachine) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
-    console.log("Creating new job for user:", userId);
+    console.log("Creating new job for user:", userId || isMachine);
 
     const body = await request.json();
-    const { spec, config } = body;
+    console.log("Request body for new job:", body);
+    const { spec, config, user_id } = body;
 
     const validationResult = configSchema.safeParse({
       spec_file_content: spec,
+      user_id,
       ...config,
     });
 
@@ -66,10 +81,17 @@ export async function POST(request: Request) {
     }
     const validatedConfig = validationResult.data;
 
+    if (!userId && !validatedConfig.user_id) {
+      return NextResponse.json(
+        { error: "User ID must be provided for machine requests." },
+        { status: 400 },
+      );
+    }
+
     const newJob = await prisma.job.create({
       data: {
         status: "queued",
-        userId: userId, // Associate job with the authenticated user
+        userId: userId! || validatedConfig.user_id!, // Associate job with the authenticated user
       },
     });
 
@@ -93,4 +115,3 @@ export async function POST(request: Request) {
     );
   }
 }
-

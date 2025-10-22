@@ -13,6 +13,7 @@ export const configSchema = z.object({
   rl_agent_max_exploration: z.number().optional(),
   time_duration_seconds: z.number().optional(),
   mutation_rate: z.number().optional(),
+  user_id: z.string().optional(),
 });
 
 // The main payload schema now uses the detailed configSchema

@@ -6,7 +6,18 @@ import { Octokit } from "@octokit/rest";
 
 import { ciSetupSchema } from "@/lib/schema";
 
-const generateWorkflowYaml = (apiKeySecretName: string, specPath: string) => `
+const generateWorkflowYaml = (
+  apiKeySecretName: string,
+  specPath: string,
+  config: any,
+  userId: string,
+) => {
+  // Remove fields that are not part of the run config
+  const { repository, specPath: sp, apiKeyName, ...runConfig } = config;
+  const configJson = JSON.stringify(runConfig).replace(/"/g, '\\"');
+  const escapedSpecPath = specPath.replace(/"/g, '\\"');
+
+  return `
 name: AutoRestTest CI
 
 on:
@@ -17,25 +28,38 @@ on:
 jobs:
   run-autoresttest:
     runs-on: ubuntu-latest
+    environment: "AutoRestTest Web"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Run AutoRestTest
         run: |
-          if [ ! -f "${specPath}" ]; then
-            echo "Error: Spec file not found at ${specPath}"
+          set -e
+
+          if [ ! -f "${escapedSpecPath}" ]; then
+            echo "Error: Spec file not found at ${escapedSpecPath}"
             exit 1
           fi
-          SPEC_CONTENT=$(cat ${specPath} | jq -c . | sed "s/'/''/g")
-          curl -X POST https://autoresttest.com/api/v1/jobs \\
+          # Use Node to read and stringify the JSON spec, which is more robust than using shell commands.
+
+          PAYLOAD=$(node -e "
+            const fs = require('fs');
+            const spec = require('./market.json');
+            const data = {
+              spec: JSON.stringify(spec),
+              config: ${configJson},
+              user_id: 'user_34JbEVSt2M9RUA7qaBE2SYPQ85z'
+            };
+            console.log(JSON.stringify(data));
+          ")
+
+          curl -X POST https://unprofanely-nonnocturnal-latonya.ngrok-free.app/api/v1/jobs \\
             -H "Content-Type: application/json" \\
             -H "Authorization: Bearer \${{ secrets.${apiKeySecretName} }}" \\
-            -d '{
-              "spec": "$SPEC_CONTENT",
-              "config": {}
-            }'
+            -d "$PAYLOAD"
 `;
+};
 
 export async function POST(request: Request) {
   console.log("CI Setup endpoint hit.");
@@ -56,7 +80,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const { repository, specPath, apiKeyName } = validationResult.data;
+  const { repository, specPath, apiKeyName, ...config } = validationResult.data;
 
   try {
     const clerk = await clerkClient();
@@ -78,8 +102,19 @@ export async function POST(request: Request) {
 
     const octokit = new Octokit({ auth: githubToken });
 
+    const { data: user } = await octokit.request("GET /user");
+    console.log("Authenticated as:", user.login);
+
+    const { headers } = await octokit.request("GET /user");
+    console.log("Token scopes:", headers["x-oauth-scopes"]);
+
     const [owner, repo] = repository.split("/");
-    const workflowContent = generateWorkflowYaml(apiKeyName, specPath);
+    const workflowContent = generateWorkflowYaml(
+      apiKeyName,
+      specPath,
+      config,
+      userId,
+    );
 
     let existingFileSha: string | undefined;
     try {
