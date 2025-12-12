@@ -24,7 +24,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 
 // Base oklch color values (L C H) from globals.css for light theme
-const BASE_OKLCH_COLORS = {
+const BASE_OKLCH_COLORS: Record<string, string> = {
   "2": "0.6 0.118 184.704", // --chart-2 (Green/Teal)
   "4": "0.828 0.189 84.429", // --chart-4 (Yellow)
   "5": "0.577 0.245 27.325", // --destructive (Red)
@@ -120,7 +120,7 @@ export function OperationStatusCodesChart({ url }: { url: string }) {
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={chartData} layout="vertical" margin={{ left: 120 }}>
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis type="number" stacked />
+          <XAxis type="number" />
           <YAxis
             dataKey="name"
             type="category"

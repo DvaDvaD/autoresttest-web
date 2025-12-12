@@ -11,7 +11,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Loader2, Terminal } from "lucide-react";
+import { Terminal } from "lucide-react";
 import ReactJson from "react-json-view";
 
 import { fetchRawData } from "@/lib/api";

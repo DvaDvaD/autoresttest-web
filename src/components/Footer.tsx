@@ -25,9 +25,9 @@ export function Footer() {
               Multi-Agent Reinforcement Learning model, was developed by the
               original research team. This web application is a separate project
               that provides a user-friendly interface to interact with their
-              innovative work. We extend our sincere gratitude to the model's
-              creators for their foundational contribution to the field of
-              automated API security.
+              innovative work. We extend our sincere gratitude to the
+              model&apos;s creators for their foundational contribution to the
+              field of automated API security.
             </p>
           </div>
         </div>

@@ -27,6 +27,7 @@
     "@radix-ui/react-tabs": "^1.1.13",
     "@radix-ui/react-tooltip": "^1.2.8",
     "@radix-ui/react-use-controllable-state": "^1.2.2",
+    "@shikijs/transformers": "^3.13.0",
     "@tanstack/react-query": "^5.90.2",
     "@tanstack/react-query-devtools": "^5.90.2",
     "@tanstack/react-table": "^8.21.3",
@@ -42,7 +43,6 @@
     "react-dom": "19.1.0",
     "react-dropzone": "^14.3.8",
     "react-json-view": "^1.21.3",
-    "react-shaders": "^0.0.4",
     "recharts": "2.15.4",
     "redis": "^5.8.3",
     "shiki": "^3.13.0",
@@ -67,4 +67,3 @@
   },
   "packageManager": "pnpm@10.18.1+sha512.77a884a165cbba2d8d1c19e3b4880eee6d2fcabd0d879121e282196b80042351d5eb3ca0935fa599da1dc51265cc68816ad2bddd2a2de5ea9fdf92adbec7cd34"
 }
-

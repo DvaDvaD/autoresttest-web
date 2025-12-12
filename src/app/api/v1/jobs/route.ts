@@ -19,9 +19,9 @@ const jobListQuery = Prisma.validator<Prisma.JobFindManyArgs>()({
 });
 type JobListJob = Prisma.JobGetPayload<typeof jobListQuery>;
 
-export async function GET(
-  request: Request,
-): Promise<NextResponse<JobListJob[] | { error: string }>> {
+export async function GET(): Promise<
+  NextResponse<JobListJob[] | { error: string }>
+> {
   try {
     const { userId } = await auth();
     if (!userId) {

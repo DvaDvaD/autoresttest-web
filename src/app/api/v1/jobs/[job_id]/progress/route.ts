@@ -65,9 +65,13 @@ export async function PATCH(
     });
 
     if (updateResult.count === 0) {
-        console.log(`Job ${job_id} was already in a terminal state. No progress update applied.`);
-        // Return a success response but indicate that no change was made.
-        return NextResponse.json({ message: "Job is in a terminal state; no update applied." });
+      console.log(
+        `Job ${job_id} was already in a terminal state. No progress update applied.`,
+      );
+      // Return a success response but indicate that no change was made.
+      return NextResponse.json({
+        message: "Job is in a terminal state; no update applied.",
+      });
     }
 
     return NextResponse.json({ message: "Progress updated successfully." });
@@ -77,7 +81,7 @@ export async function PATCH(
       error instanceof Error &&
       error.name === "PrismaClientKnownRequestError"
     ) {
-      // @ts-expect-error
+      // @ts-expect-error: The check for error.name should already guarantees the existence of .code
       if (error.code === "P2025") {
         return NextResponse.json(
           { error: `Job with ID ${job_id} not found.` },

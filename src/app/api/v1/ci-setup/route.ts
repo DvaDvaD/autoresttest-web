@@ -4,16 +4,16 @@ import { NextResponse } from "next/server";
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { Octokit } from "@octokit/rest";
 
-import { ciSetupSchema } from "@/lib/schema";
+import { ciSetupSchema, TCITestConfig } from "@/lib/schema";
 
 const generateWorkflowYaml = (
   apiKeySecretName: string,
   specPath: string,
-  config: any,
+  config: TCITestConfig,
   userId: string,
 ) => {
   // Remove fields that are not part of the run config
-  const { repository, specPath: sp, apiKeyName, ...runConfig } = config;
+  const { ...runConfig } = config;
   const configJson = JSON.stringify(runConfig).replace(/"/g, '\\"');
   const escapedSpecPath = specPath.replace(/"/g, '\\"');
 
@@ -80,7 +80,8 @@ export async function POST(request: Request) {
     );
   }
 
-  const { repository, specPath, apiKeyName, ...config } = validationResult.data;
+  const ciSetupConfig = validationResult.data;
+  const { repository, specPath, apiKeyName, ...config } = ciSetupConfig;
 
   try {
     const clerk = await clerkClient();
@@ -112,7 +113,7 @@ export async function POST(request: Request) {
     const workflowContent = generateWorkflowYaml(
       apiKeyName,
       specPath,
-      config,
+      ciSetupConfig,
       userId,
     );
 
@@ -126,7 +127,7 @@ export async function POST(request: Request) {
       if (!Array.isArray(existingFile)) {
         existingFileSha = existingFile.sha;
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error.status !== 404) throw error;
     }
 

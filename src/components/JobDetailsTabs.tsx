@@ -1,18 +1,20 @@
-'use client';
+"use client";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Job } from '@/app/jobs/[jobId]/page';
-import { StatusCodePieChart } from './StatusCodePieChart';
-import { ServerErrorBarChart } from './ServerErrorBarChart';
-import { RawDataDownloads } from './RawDataDownloads';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { StatusCodePieChart } from "./StatusCodePieChart";
+import { ServerErrorBarChart } from "./ServerErrorBarChart";
+import { RawDataDownloads } from "./RawDataDownloads";
+import { Job } from "@/lib/api";
 
 export function JobDetailsTabs({ job }: { job: Job }) {
   return (
     <Tabs defaultValue="status_codes" className="w-full">
       <TabsList className="grid w-full grid-cols-3">
         <TabsTrigger value="status_codes">Status Code Distribution</TabsTrigger>
-        <TabsTrigger value="server_errors">Operations with Server Errors</TabsTrigger>
+        <TabsTrigger value="server_errors">
+          Operations with Server Errors
+        </TabsTrigger>
         <TabsTrigger value="downloads">Downloads</TabsTrigger>
       </TabsList>
       <TabsContent value="status_codes">
@@ -31,7 +33,9 @@ export function JobDetailsTabs({ job }: { job: Job }) {
             <CardTitle>Operations with Server Errors</CardTitle>
           </CardHeader>
           <CardContent className="h-96">
-            <ServerErrorBarChart data={job.summary?.operations_with_server_errors} />
+            <ServerErrorBarChart
+              data={job.summary?.operations_with_server_errors}
+            />
           </CardContent>
         </Card>
       </TabsContent>
@@ -48,3 +52,4 @@ export function JobDetailsTabs({ job }: { job: Job }) {
     </Tabs>
   );
 }
+

@@ -38,3 +38,5 @@ export const progressUpdateSchema = z.object({
 });
 
 export type TProgressUpdateSchema = z.infer<typeof progressUpdateSchema>;
+export type TManualTestConfig = z.infer<typeof configSchema>;
+export type TCITestConfig = z.infer<typeof ciSetupSchema>;
