@@ -10,7 +10,6 @@ import { TJob } from "@/lib/schema";
 
 export function JobDetailsDataExplorer({ job }: { job: TJob }) {
   const rawFileUrls = job.rawFileUrls || {};
-  console.log(rawFileUrls);
 
   return (
     <div>

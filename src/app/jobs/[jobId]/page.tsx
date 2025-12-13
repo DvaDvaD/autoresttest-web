@@ -11,6 +11,7 @@ import { fetchJob } from "@/lib/api";
 import { Terminal, Hourglass, XCircle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TJob } from "@/lib/schema";
+import { JobDetailsTabs } from "@/components/JobDetailsTabs";
 
 const InProgressPlaceholder = () => (
   <div className="flex flex-col items-center justify-center text-center p-10 border-2 border-dashed rounded-lg mt-8">
@@ -89,6 +90,7 @@ export default function JobDetailsPage() {
         <>
           <KeyMetricsDashboard summary={job.summary} />
           <TestConfigDisplay config={job.config} />
+          <JobDetailsTabs job={job} />
           <JobDetailsDataExplorer job={job} />
         </>
       )}

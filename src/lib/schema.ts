@@ -51,6 +51,8 @@ export const groupedErrorsSchema = z.record(
 
 // Schema for the summary object in the Job type
 export const jobSummarySchema = z.object({
+  title: z.string().optional().nullable(),
+  status_code_distribution: z.any().optional().nullable(),
   total_requests_sent: z.number().optional().nullable(),
   duration: z.string().optional().nullable(),
   operations_with_server_errors: groupedErrorsSchema.optional().nullable(),

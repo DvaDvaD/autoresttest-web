@@ -43,8 +43,11 @@ import {
 import { createJob, setupCI } from "@/lib/api";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export function TestForm() {
+  const router = useRouter();
+
   const [testType, setTestType] = useState("one-time");
   // State for One-Time Test
   const [spec, setSpec] = useState("");
@@ -71,11 +74,12 @@ export function TestForm() {
 
   const oneTimeJobMutation = useMutation({
     mutationFn: createJob,
-    onSuccess: () => {
+    onSuccess: ({ jobId }) => {
       queryClient.invalidateQueries({ queryKey: ["jobs"] });
       toast.success("Job Created!", {
         description: "Your test is now running.",
       });
+      router.push(`/jobs/${jobId}`);
     },
     onError: (error) => {
       toast.error("Failed to Create Job", { description: error.message });
