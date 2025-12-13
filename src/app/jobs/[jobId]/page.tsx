@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { useParams } from "next/navigation";
+import { notFound, useParams } from "next/navigation";
 import { JobSummaryHeader } from "@/components/JobSummaryHeader";
 import { KeyMetricsDashboard } from "@/components/KeyMetricsDashboard";
 import { TestConfigDisplay } from "@/components/TestConfigDisplay";
@@ -59,6 +59,10 @@ export default function JobDetailsPage() {
     return <JobDetailsSkeleton />;
   }
 
+  if (!job) {
+    notFound();
+  }
+
   if (error) {
     return (
       <div className="container mx-auto p-4 sm:p-6 lg:p-8">
@@ -71,10 +75,6 @@ export default function JobDetailsPage() {
         </Alert>
       </div>
     );
-  }
-
-  if (!job) {
-    return null; // Or a 'Not Found' component
   }
 
   const isRunning = job.status === "queued" || job.status === "running";

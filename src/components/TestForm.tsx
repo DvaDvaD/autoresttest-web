@@ -59,8 +59,8 @@ export function TestForm() {
   // Universal Advanced Settings
   const [llmEngine, setLlmEngine] = useState("gpt-4");
   const [temperature, setTemperature] = useState([0.7]);
-  const [useCachedGraph, setUseCachedGraph] = useState(false);
-  const [useCachedQTables, setUseCachedQTables] = useState(false);
+  const [useCachedGraph, setUseCachedGraph] = useState(true);
+  const [useCachedQTables, setUseCachedQTables] = useState(true);
   const [learningRate, setLearningRate] = useState([0.1]);
   const [discountFactor, setDiscountFactor] = useState([0.9]);
   const [maxExploration, setMaxExploration] = useState([1]);
