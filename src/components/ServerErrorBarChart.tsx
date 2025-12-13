@@ -14,11 +14,20 @@ import {
   CartesianGrid,
 } from "recharts";
 
-export function ServerErrorBarChart({
-  data,
-}: {
-  data: Record<string, number>;
-}) {
+interface ServerErrorBarChartProps {
+  data:
+    | Record<
+        string,
+        {
+          parameters: Record<string, unknown> | null;
+          body: Record<string, unknown> | null;
+        }[]
+      >
+    | null
+    | undefined;
+}
+
+export function ServerErrorBarChart({ data }: ServerErrorBarChartProps) {
   if (!data || Object.keys(data).length === 0)
     return (
       <div className="text-center text-muted-foreground">

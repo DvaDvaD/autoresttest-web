@@ -38,10 +38,10 @@ import ReactJson from "react-json-view";
 
 // --- Helper Functions & Components (as before) ---
 
-function findMinMax(obj: any): [number, number] {
+function findMinMax(obj: unknown): [number, number] {
   let min = Infinity;
   let max = -Infinity;
-  function traverse(current: any) {
+  function traverse(current: unknown) {
     if (typeof current === "number") {
       if (current < min) min = current;
       if (current > max) max = current;
@@ -91,7 +91,7 @@ const HeatmapItem = ({
   </div>
 );
 
-const ValueAgentTable = ({ data }: { data: [any, number][] }) => {
+const ValueAgentTable = ({ data }: { data: [unknown, number][] }) => {
   const [min, max] = useMemo(() => findMinMax(data.map((d) => d[1])), [data]);
   return (
     <div className="max-h-[60vh] overflow-y-auto">
@@ -103,33 +103,37 @@ const ValueAgentTable = ({ data }: { data: [any, number][] }) => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {data.map(([value, score], i) => (
-            <TableRow key={i}>
-              <TableCell>
-                <ReactJson
-                  src={value}
-                  theme="monokai"
-                  collapsed={true}
-                  name={false}
-                  displayDataTypes={false}
-                  enableClipboard={(copy) => {
-                    // This function runs immediately when user clicks "copy"
-                    const text =
-                      typeof copy === "string"
-                        ? copy
-                        : JSON.stringify(copy, null, 2);
-                    navigator.clipboard.writeText(text).catch(console.error);
-                  }}
-                />
-              </TableCell>
-              <TableCell
-                className="text-right font-semibold"
-                style={{ backgroundColor: getHeatmapColor(score, min, max) }}
-              >
-                {score.toFixed(4)}
-              </TableCell>
-            </TableRow>
-          ))}
+          {data.map(([value, score], i) => {
+            if (!(value instanceof Object)) return null;
+
+            return (
+              <TableRow key={i}>
+                <TableCell>
+                  <ReactJson
+                    src={value}
+                    theme="monokai"
+                    collapsed={true}
+                    name={false}
+                    displayDataTypes={false}
+                    enableClipboard={(copy) => {
+                      // This function runs immediately when user clicks "copy"
+                      const text =
+                        typeof copy === "string"
+                          ? copy
+                          : JSON.stringify(copy, null, 2);
+                      navigator.clipboard.writeText(text).catch(console.error);
+                    }}
+                  />
+                </TableCell>
+                <TableCell
+                  className="text-right font-semibold"
+                  style={{ backgroundColor: getHeatmapColor(score, min, max) }}
+                >
+                  {score.toFixed(4)}
+                </TableCell>
+              </TableRow>
+            );
+          })}
         </TableBody>
       </Table>
     </div>
@@ -142,7 +146,7 @@ const DataNode = ({
   min,
   max,
 }: {
-  data: any;
+  data: unknown;
   level: number;
   min: number;
   max: number;
@@ -213,12 +217,16 @@ const OperationAgentViewer = ({ data }: { data: Record<string, number> }) => {
 
 import { fetchRawData } from "@/lib/api";
 
-export function QTablesExplorer({ url }: { url: string }) {
-  const { data, isLoading, isError, error } = useQuery<any>({
-    queryKey: ["qTables", url],
-    queryFn: () => fetchRawData(url),
-    enabled: !!url,
-  });
+export function QTablesExplorer({ url }: { url: string | null | undefined }) {
+  const { data, isLoading, isError, error } = useQuery<Record<string, unknown>>(
+    {
+      queryKey: ["qTables", url],
+      // Non null assertion is used here because "enabled" ensures that the url will be available
+      // on the invocation of the queryFn
+      queryFn: () => fetchRawData(url!),
+      enabled: !!url,
+    },
+  );
 
   const [min, max] = useMemo(
     () => (isLoading || !data ? [0, 0] : findMinMax(data)),
@@ -250,6 +258,7 @@ export function QTablesExplorer({ url }: { url: string }) {
 
     const agentData = data[selectedAgent || agents[0]];
     const agentName = selectedAgent || agents[0];
+    type TOperationAgentData = Record<string, number>;
 
     if (typeof agentData === "string") {
       return (
@@ -258,7 +267,7 @@ export function QTablesExplorer({ url }: { url: string }) {
         </p>
       );
     } else if (agentName === "OPERATION AGENT") {
-      return <OperationAgentViewer data={agentData} />;
+      return <OperationAgentViewer data={agentData as TOperationAgentData} />;
     } else {
       return <DataNode data={agentData} level={0} min={min} max={max} />;
     }

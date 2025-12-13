@@ -1,8 +1,9 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { TJobSummary } from '@/lib/schema';
 
-export function KeyMetricsDashboard({ summary }: { summary: any }) {
+export function KeyMetricsDashboard({ summary }: { summary: TJobSummary | null }) {
   const metrics = [
     { title: 'Total Requests', value: summary?.total_requests_sent },
     { title: 'Test Duration', value: summary?.duration },

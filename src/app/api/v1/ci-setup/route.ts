@@ -128,7 +128,9 @@ export async function POST(request: Request) {
         existingFileSha = existingFile.sha;
       }
     } catch (error: unknown) {
-      if (error.status !== 404) throw error;
+      if (error instanceof Error && "status" in error) {
+        if (error.status !== 404) throw error;
+      }
     }
 
     console.log(`Attempting to create/update workflow in ${repository}`);
@@ -143,19 +145,26 @@ export async function POST(request: Request) {
 
     console.log("Workflow file created/updated successfully.");
     return NextResponse.json({ message: "Workflow created successfully!" });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("CI Setup Error:", error);
-    if (error.status === 404) {
+    if (error instanceof Error && "status" in error) {
+      if (error.status === 404) {
+        return NextResponse.json(
+          {
+            error:
+              "Repository not found. Please check the name and ensure you have access.",
+          },
+          { status: 404 },
+        );
+      }
       return NextResponse.json(
-        {
-          error:
-            "Repository not found. Please check the name and ensure you have access.",
-        },
-        { status: 404 },
+        { error: error.message || "Failed to create workflow file." },
+        { status: 500 },
       );
     }
+
     return NextResponse.json(
-      { error: error.message || "Failed to create workflow file." },
+      { error: "Failed to create workflow file." },
       { status: 500 },
     );
   }

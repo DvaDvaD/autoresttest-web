@@ -2,8 +2,9 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { GroupedDataViewer } from './GroupedDataViewer';
+import { TRawFileUrls } from '@/lib/schema';
 
-export function SuccessfulRequestsViewer({ urls }: { urls: Record<string, string> }) {
+export function SuccessfulRequestsViewer({ urls }: { urls: TRawFileUrls | null }) {
     const tabs = [
         { key: 'successful_bodies', label: 'Bodies' },
         { key: 'successful_parameters', label: 'Parameters' },

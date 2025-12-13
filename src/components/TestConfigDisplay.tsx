@@ -31,6 +31,7 @@ import {
   XCircle,
 } from "lucide-react";
 import React from "react";
+import { TManualTestConfig } from "@/lib/schema";
 
 function formatLabel(key: string) {
   return key.replace(/_/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
@@ -49,7 +50,13 @@ const iconMap: Record<string, typeof Link> = {
   rl_agent_max_exploration: Compass,
 };
 
-const ConfigItem = ({ itemKey, value }: { itemKey: string; value: any }) => {
+const ConfigItem = ({
+  itemKey,
+  value,
+}: {
+  itemKey: string;
+  value: TManualTestConfig[keyof TManualTestConfig];
+}) => {
   const Icon = iconMap[itemKey] || Compass; // Default icon
   const label = formatLabel(itemKey);
 
@@ -81,7 +88,11 @@ const ConfigItem = ({ itemKey, value }: { itemKey: string; value: any }) => {
   );
 };
 
-export function TestConfigDisplay({ config }: { config: any }) {
+export function TestConfigDisplay({
+  config,
+}: {
+  config: TManualTestConfig | null;
+}) {
   if (!config) return null;
 
   const { spec_file_content, ...otherConfig } = config;

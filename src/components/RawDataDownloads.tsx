@@ -2,7 +2,11 @@
 
 import { Download } from "lucide-react";
 
-export function RawDataDownloads({ urls }: { urls: Record<string, string> }) {
+export function RawDataDownloads({
+  urls,
+}: {
+  urls: Record<string, string | null | undefined> | null;
+}) {
   if (!urls)
     return (
       <div className="text-center text-muted-foreground">
@@ -15,7 +19,7 @@ export function RawDataDownloads({ urls }: { urls: Record<string, string> }) {
       {Object.entries(urls).map(([key, url]) => (
         <a
           key={key}
-          href={url}
+          href={url ?? ""}
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors"

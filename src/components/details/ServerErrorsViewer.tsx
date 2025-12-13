@@ -30,17 +30,19 @@ import { Badge } from "@/components/ui/badge";
 import { Terminal } from "lucide-react";
 import ReactJson from "react-json-view";
 
-// Type for the grouped data
-type GroupedErrors = Record<string, { parameters: any; body: any }[]>;
-
 import { fetchRawData } from "@/lib/api";
+import { TGroupedErrors } from "@/lib/schema";
 
-export function ServerErrorsViewer({ url }: { url: string }) {
+export function ServerErrorsViewer({
+  url,
+}: {
+  url: string | null | undefined;
+}) {
   const [enabled, setEnabled] = useState(false);
 
-  const { data, isLoading, isError, error } = useQuery<GroupedErrors>({
+  const { data, isLoading, isError, error } = useQuery<TGroupedErrors>({
     queryKey: ["serverErrorsGrouped", url],
-    queryFn: () => fetchRawData(url),
+    queryFn: () => fetchRawData(url!),
     enabled: enabled && !!url,
   });
 

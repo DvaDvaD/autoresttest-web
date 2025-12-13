@@ -43,12 +43,16 @@ function generateShade(baseLCH: string, index: number, totalInGroup: number) {
   return `oklch(${newL.toFixed(3)} ${c} ${h})`;
 }
 
-export function OperationStatusCodesChart({ url }: { url: string }) {
+export function OperationStatusCodesChart({
+  url,
+}: {
+  url: string | null | undefined;
+}) {
   const { data, isLoading, isError, error } = useQuery<
     Record<string, Record<string, number>>
   >({
     queryKey: ["operationStatusCodes", url],
-    queryFn: () => fetchRawData(url),
+    queryFn: () => fetchRawData(url!),
     enabled: !!url,
   });
 

@@ -32,12 +32,6 @@ function generateShade(baseLCH: string, index: number, totalInGroup: number) {
 }
 
 export function StatusCodePieChart({ data }: { data: Record<string, number> }) {
-  if (!data) {
-    return (
-      <div className="text-center text-muted-foreground">No data available</div>
-    );
-  }
-
   const chartData = useMemo(
     () =>
       Object.entries(data).map(([status, value]) => ({

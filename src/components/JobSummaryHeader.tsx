@@ -2,10 +2,10 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Job } from "@/lib/api";
+import { TJob } from "@/lib/schema";
 import { format } from "date-fns";
 
-export function JobSummaryHeader({ job }: { job: Job }) {
+export function JobSummaryHeader({ job }: { job: TJob }) {
   const getStatusVariant = (status: string) => {
     switch (status) {
       case "completed":

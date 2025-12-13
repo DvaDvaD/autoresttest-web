@@ -5,9 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusCodePieChart } from "./StatusCodePieChart";
 import { ServerErrorBarChart } from "./ServerErrorBarChart";
 import { RawDataDownloads } from "./RawDataDownloads";
-import { Job } from "@/lib/api";
+import { TJob } from "@/lib/schema";
 
-export function JobDetailsTabs({ job }: { job: Job }) {
+export function JobDetailsTabs({ job }: { job: TJob }) {
   return (
     <Tabs defaultValue="status_codes" className="w-full">
       <TabsList className="grid w-full grid-cols-3">
@@ -52,4 +52,3 @@ export function JobDetailsTabs({ job }: { job: Job }) {
     </Tabs>
   );
 }
-

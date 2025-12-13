@@ -20,16 +20,18 @@ export function GroupedDataViewer({
   url,
   dataKey,
 }: {
-  url: string;
+  url: string | undefined;
   dataKey: string;
 }) {
   const [enabled, setEnabled] = useState(false);
 
-  const { data, isLoading, isError, error } = useQuery<Record<string, any>>({
-    queryKey: [dataKey, url],
-    queryFn: () => fetchRawData(url),
-    enabled: enabled && !!url,
-  });
+  const { data, isLoading, isError, error } = useQuery<Record<string, unknown>>(
+    {
+      queryKey: [dataKey, url],
+      queryFn: () => fetchRawData(url!),
+      enabled: enabled && !!url,
+    },
+  );
 
   if (!url) {
     return (
@@ -80,36 +82,40 @@ export function GroupedDataViewer({
 
   return (
     <Accordion type="multiple" className="w-full space-y-2">
-      {Object.entries(data).map(([operationId, details]) => (
-        <AccordionItem
-          key={operationId}
-          value={operationId}
-          className="border rounded-lg"
-        >
-          <AccordionTrigger className="px-4 py-2 text-base font-medium hover:no-underline">
-            {operationId}
-          </AccordionTrigger>
-          <AccordionContent className="p-2 border-t">
-            <div className="p-2 bg-muted rounded-lg max-h-[400px] overflow-auto">
-              <ReactJson
-                src={details}
-                theme="monokai"
-                collapsed={1}
-                name={false}
-                displayDataTypes={false}
-                enableClipboard={(copy) => {
-                  // This function runs immediately when user clicks "copy"
-                  const text =
-                    typeof copy === "string"
-                      ? copy
-                      : JSON.stringify(copy, null, 2);
-                  navigator.clipboard.writeText(text).catch(console.error);
-                }}
-              />
-            </div>
-          </AccordionContent>
-        </AccordionItem>
-      ))}
+      {Object.entries(data).map(([operationId, details]) => {
+        if (!(details instanceof Object)) return null;
+
+        return (
+          <AccordionItem
+            key={operationId}
+            value={operationId}
+            className="border rounded-lg"
+          >
+            <AccordionTrigger className="px-4 py-2 text-base font-medium hover:no-underline">
+              {operationId}
+            </AccordionTrigger>
+            <AccordionContent className="p-2 border-t">
+              <div className="p-2 bg-muted rounded-lg max-h-[400px] overflow-auto">
+                <ReactJson
+                  src={details}
+                  theme="monokai"
+                  collapsed={1}
+                  name={false}
+                  displayDataTypes={false}
+                  enableClipboard={(copy) => {
+                    // This function runs immediately when user clicks "copy"
+                    const text =
+                      typeof copy === "string"
+                        ? copy
+                        : JSON.stringify(copy, null, 2);
+                    navigator.clipboard.writeText(text).catch(console.error);
+                  }}
+                />
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        );
+      })}
     </Accordion>
   );
 }

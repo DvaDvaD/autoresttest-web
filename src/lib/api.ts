@@ -1,29 +1,14 @@
 "use client";
+import { TJob } from "./schema";
 
 // A central file for all API-related functions.
-
-// Define the type for a single job based on the backend response.
-// Exporting this allows components to use it for type safety.
-export type Job = {
-  id: string;
-  userId: string;
-  status: string;
-  statusMessage: string | null;
-  progressPercentage: number | null;
-  currentOperation: string | null;
-  summary: any;
-  config: any;
-  rawFileUrls: any;
-  createdAt: string;
-  updatedAt: string;
-};
 
 /**
  * Fetches the details for a single job.
  * @param jobId The ID of the job to fetch.
  * @returns A promise that resolves to the Job object.
  */
-export async function fetchJob(jobId: string): Promise<Job> {
+export async function fetchJob(jobId: string): Promise<TJob> {
   const res = await fetch(`/api/v1/jobs/${jobId}`);
   if (!res.ok) {
     // You can add more specific error handling here if needed
@@ -38,7 +23,7 @@ export async function fetchJob(jobId: string): Promise<Job> {
 /**
  * Fetches the list of all jobs for the current user.
  */
-export async function fetchJobs(): Promise<Job[]> {
+export async function fetchJobs(): Promise<TJob[]> {
   const res = await fetch("/api/v1/jobs");
   if (!res.ok) {
     throw new Error("Failed to fetch job history");
@@ -50,7 +35,7 @@ export async function fetchJobs(): Promise<Job[]> {
  * Creates a new test job.
  * @param data The job creation payload (spec and config).
  */
-export async function createJob(data: any): Promise<{ jobId: string }> {
+export async function createJob(data: unknown): Promise<{ jobId: string }> {
   const response = await fetch("/api/v1/jobs", {
     method: "POST",
     headers: {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchJobs, cancelJob, Job } from "@/lib/api";
+import { fetchJobs, cancelJob } from "@/lib/api";
 import {
   createColumnHelper,
   flexRender,
@@ -35,8 +35,9 @@ import {
   ChevronsLeft,
   ChevronsRight,
 } from "lucide-react";
+import { TJob } from "@/lib/schema";
 
-const columnHelper = createColumnHelper<Job>();
+const columnHelper = createColumnHelper<TJob>();
 
 const StatusBadge = ({ status }: { status: string }) => {
   const variant: "default" | "destructive" | "outline" | "secondary" =
@@ -50,7 +51,7 @@ const StatusBadge = ({ status }: { status: string }) => {
 
 export function JobHistory() {
   const queryClient = useQueryClient();
-  const { data: jobs, isLoading } = useQuery<Job[]>({
+  const { data: jobs, isLoading } = useQuery<TJob[]>({
     queryKey: ["jobs"],
     queryFn: fetchJobs,
     refetchInterval: (query) => {
@@ -236,4 +237,3 @@ export function JobHistory() {
     </Card>
   );
 }
-

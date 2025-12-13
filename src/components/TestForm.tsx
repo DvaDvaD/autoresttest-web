@@ -364,7 +364,7 @@ export function TestForm() {
               <Label htmlFor="cachedQTables">Use Cached Q-Tables</Label>
             </div>
             <p className="text-xs text-muted-foreground pt-1 pl-6">
-              Speeds up tests by reusing the agent's previously learned
+              Speeds up tests by reusing the agent&apos;s previously learned
               knowledge.
             </p>
           </div>
@@ -485,4 +485,3 @@ export function TestForm() {
     </form>
   );
 }
-

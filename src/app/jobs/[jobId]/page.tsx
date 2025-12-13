@@ -7,9 +7,10 @@ import { KeyMetricsDashboard } from "@/components/KeyMetricsDashboard";
 import { TestConfigDisplay } from "@/components/TestConfigDisplay";
 import { JobDetailsDataExplorer } from "@/components/JobDetailsDataExplorer";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Job, fetchJob } from "@/lib/api";
+import { fetchJob } from "@/lib/api";
 import { Terminal, Hourglass, XCircle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { TJob } from "@/lib/schema";
 
 const InProgressPlaceholder = () => (
   <div className="flex flex-col items-center justify-center text-center p-10 border-2 border-dashed rounded-lg mt-8">
@@ -39,7 +40,7 @@ export default function JobDetailsPage() {
     data: job,
     error,
     isLoading,
-  } = useQuery<Job, Error>({
+  } = useQuery<TJob, Error>({
     queryKey: ["job", jobId],
     queryFn: () => fetchJob(jobId),
     enabled: !!jobId,

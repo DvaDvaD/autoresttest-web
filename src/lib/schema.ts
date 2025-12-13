@@ -37,6 +37,66 @@ export const progressUpdateSchema = z.object({
   statusMessage: z.string().optional(),
 });
 
+// Schema for server error details, used in viewers and summaries
+export const errorDetailSchema = z.object({
+  parameters: z.record(z.string(), z.unknown()).nullable(),
+  body: z.record(z.string(), z.unknown()).nullable(),
+});
+
+// Schema for errors grouped by operation ID
+export const groupedErrorsSchema = z.record(
+  z.string(),
+  z.array(errorDetailSchema),
+);
+
+// Schema for the summary object in the Job type
+export const jobSummarySchema = z.object({
+  total_requests_sent: z.number().optional().nullable(),
+  duration: z.string().optional().nullable(),
+  operations_with_server_errors: groupedErrorsSchema.optional().nullable(),
+  number_of_unique_server_errors: z.number().optional().nullable(),
+  number_of_successfully_processed_operations: z.number().optional().nullable(),
+  number_of_total_operations: z.number().optional().nullable(),
+  percentage_of_successfully_processed_operations: z
+    .string()
+    .optional()
+    .nullable(),
+});
+
+// Schema for the raw data file URLs
+export const rawFileUrlsSchema = z
+  .object({
+    operation_status_codes: z.string().optional().nullable(),
+    server_errors: z.string().optional().nullable(),
+    successful_bodies: z.string().optional().nullable(),
+    successful_parameters: z.string().optional().nullable(),
+    successful_responses: z.string().optional().nullable(),
+    successful_primitives: z.string().optional().nullable(),
+    q_tables: z.string().optional().nullable(),
+  })
+  .catchall(z.string());
+
+// The main schema for a Job
+export const jobSchema = z.object({
+  id: z.string(),
+  userId: z.string(),
+  status: z.string(),
+  statusMessage: z.string().nullable(),
+  progressPercentage: z.number().nullable(),
+  currentOperation: z.string().nullable(),
+  summary: jobSummarySchema.nullable(),
+  config: configSchema.nullable(),
+  rawFileUrls: rawFileUrlsSchema.nullable(),
+  createdAt: z.string(), // Assuming ISO string format
+  updatedAt: z.string(), // Assuming ISO string format
+});
+
 export type TProgressUpdateSchema = z.infer<typeof progressUpdateSchema>;
 export type TManualTestConfig = z.infer<typeof configSchema>;
 export type TCITestConfig = z.infer<typeof ciSetupSchema>;
+
+export type TErrorDetail = z.infer<typeof errorDetailSchema>;
+export type TGroupedErrors = z.infer<typeof groupedErrorsSchema>;
+export type TJobSummary = z.infer<typeof jobSummarySchema>;
+export type TRawFileUrls = z.infer<typeof rawFileUrlsSchema>;
+export type TJob = z.infer<typeof jobSchema>;

@@ -6,9 +6,9 @@ import { OperationStatusCodesChart } from "./details/OperationStatusCodesChart";
 import { ServerErrorsViewer } from "./details/ServerErrorsViewer";
 import { SuccessfulRequestsViewer } from "./details/SuccessfulRequestsViewer";
 import { QTablesExplorer } from "./details/QTablesExplorer";
-import { Job } from "@/lib/api";
+import { TJob } from "@/lib/schema";
 
-export function JobDetailsDataExplorer({ job }: { job: Job }) {
+export function JobDetailsDataExplorer({ job }: { job: TJob }) {
   const rawFileUrls = job.rawFileUrls || {};
   console.log(rawFileUrls);
 
