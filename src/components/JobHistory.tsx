@@ -105,9 +105,10 @@ export function JobHistory() {
 
   const replayMutation = useMutation({
     mutationFn: replayJob,
-    onSuccess: () => {
+    onSuccess: ({ jobId }) => {
       queryClient.invalidateQueries({ queryKey: ["jobs"] });
       toast.success("Job replay requested successfully");
+      router.push(`/jobs/${jobId}`);
     },
     onError: (error) => {
       toast.error(`Failed to replay job: ${error.message}`);

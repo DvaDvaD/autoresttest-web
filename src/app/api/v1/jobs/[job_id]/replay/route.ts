@@ -46,6 +46,7 @@ export async function POST(request: Request, props: RouteParams) {
 
     return NextResponse.json({
       message: "Replay request sent successfully.",
+      jobId: jobId,
     });
   } catch (error) {
     console.error(`Error replaying job ${jobId}:`, error);

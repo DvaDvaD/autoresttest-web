@@ -91,7 +91,9 @@ export async function deleteJob(jobId: string): Promise<{ message: string }> {
  * Sends a request to replay a job.
  * @param jobId The ID of the job to replay.
  */
-export async function replayJob(jobId: string): Promise<{ message: string }> {
+export async function replayJob(
+  jobId: string,
+): Promise<{ message: string; jobId: string }> {
   const response = await fetch(`/api/v1/jobs/${jobId}/replay`, {
     method: "POST",
   });
