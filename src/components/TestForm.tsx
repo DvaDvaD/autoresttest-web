@@ -34,16 +34,29 @@ import {
   DropzoneEmptyState,
   DropzoneContent,
 } from "@/components/ui/shadcn-io/dropzone";
-import {
-  CodeBlock,
-  CodeBlockBody,
-  CodeBlockContent,
-  CodeBlockItem,
-} from "@/components/ui/shadcn-io/code-block";
+import ReactJsonView from "react-json-view";
 import { createJob, setupCI } from "@/lib/api";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+
+const JsonViewer = ({ jsonString }: { jsonString: string }) => {
+  try {
+    const jsonObj = JSON.parse(jsonString);
+    return (
+      <ReactJsonView
+        src={jsonObj}
+        theme="monokai"
+        iconStyle="circle"
+        displayDataTypes={false}
+        name={false}
+      />
+    );
+  } catch (error) {
+    // If parsing fails, show the raw text.
+    return <pre>{jsonString}</pre>;
+  }
+};
 
 export function TestForm() {
   const router = useRouter();
@@ -52,7 +65,6 @@ export function TestForm() {
   // State for One-Time Test
   const [spec, setSpec] = useState("");
   const [specFile, setSpecFile] = useState<File[] | undefined>();
-  const [specLanguage, setSpecLanguage] = useState("yaml");
   const [specIsTouched, setSpecIsTouched] = useState(false);
   const [apiUrl, setApiUrl] = useState("");
   // State for CI Setup
@@ -104,8 +116,6 @@ export function TestForm() {
     if (acceptedFiles.length > 0) {
       const file = acceptedFiles[0];
       setSpecFile(acceptedFiles);
-      const extension = file.name.split(".").pop()?.toLowerCase();
-      setSpecLanguage(extension === "json" ? "json" : "yaml");
       const reader = new FileReader();
       reader.onload = (e) => setSpec(e.target?.result as string);
       reader.readAsText(file);
@@ -187,7 +197,7 @@ export function TestForm() {
                   onDrop={handleFileDrop}
                   src={specFile}
                   accept={{ "application/json": [".json"] }}
-                  className={`flex-1 ${!spec && specIsTouched && "border !border-destructive"}`}
+                  className={`flex-1 ${!spec && specIsTouched && "border border-destructive!"}`}
                 >
                   {specFile ? <DropzoneContent /> : <DropzoneEmptyState />}
                 </Dropzone>
@@ -202,35 +212,16 @@ export function TestForm() {
                           {specFile?.[0].name ?? "spec"}
                         </DialogTitle>
                       </DialogHeader>
-                      <CodeBlock
-                        className="flex-grow overflow-y-auto"
-                        value={specLanguage}
-                        data={[
-                          {
-                            language: specLanguage,
-                            code: spec,
-                            filename: specFile?.[0].name ?? "spec",
-                          },
-                        ]}
-                      >
-                        <CodeBlockBody>
-                          {(item) => (
-                            <CodeBlockItem
-                              key={item.filename}
-                              value={item.language}
-                            >
-                              <CodeBlockContent>{item.code}</CodeBlockContent>
-                            </CodeBlockItem>
-                          )}
-                        </CodeBlockBody>
-                      </CodeBlock>
+                      <div className="grow overflow-y-auto">
+                        <JsonViewer jsonString={spec} />
+                      </div>
                     </DialogContent>
                   </Dialog>
                 )}
               </div>
               <p className="text-xs text-muted-foreground pt-1">
                 Upload the OpenAPI (Swagger) specification file for the API you
-                want to test. JSON format is preferred.
+                want to test in JSON format.
               </p>
               {specIsTouched && !spec && (
                 <p className="text-xs text-destructive">

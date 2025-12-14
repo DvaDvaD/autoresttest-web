@@ -122,7 +122,7 @@ export function JobHistory() {
           href={`/jobs/${info.getValue()}`}
           className="font-mono hover:underline"
         >
-          {info.getValue().substring(0, 12)}...
+          {info.getValue()}
         </Link>
       ),
     }),
@@ -132,6 +132,10 @@ export function JobHistory() {
     }),
     columnHelper.accessor("createdAt", {
       header: "Created At",
+      cell: (info) => new Date(info.getValue()).toLocaleString(),
+    }),
+    columnHelper.accessor("updatedAt", {
+      header: "Updated At",
       cell: (info) => new Date(info.getValue()).toLocaleString(),
     }),
     columnHelper.display({
@@ -176,7 +180,9 @@ export function JobHistory() {
                 <DropdownMenuItem
                   onSelect={() => {
                     if (
-                      window.confirm("Are you sure you want to delete this job?")
+                      window.confirm(
+                        "Are you sure you want to delete this job?",
+                      )
                     ) {
                       deleteMutation.mutate(job.id);
                     }

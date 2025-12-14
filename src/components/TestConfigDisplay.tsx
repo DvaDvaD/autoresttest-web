@@ -10,12 +10,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import {
-  CodeBlock,
-  CodeBlockBody,
-  CodeBlockContent,
-  CodeBlockItem,
-} from "@/components/ui/shadcn-io/code-block";
+import ReactJsonView from "react-json-view";
 import {
   BrainCircuit,
   GitCommit,
@@ -50,6 +45,23 @@ const iconMap: Record<string, typeof Link> = {
   rl_agent_max_exploration: Compass,
 };
 
+const JsonViewer = ({ jsonString }: { jsonString: string }) => {
+  try {
+    const jsonObj = JSON.parse(jsonString);
+    return (
+      <ReactJsonView
+        src={jsonObj}
+        theme="monokai"
+        iconStyle="circle"
+        displayDataTypes={false}
+        name={false}
+      />
+    );
+  } catch (error) {
+    return <pre>{jsonString}</pre>;
+  }
+};
+
 const ConfigItem = ({
   itemKey,
   value,
@@ -79,7 +91,7 @@ const ConfigItem = ({
     <div className="flex items-center gap-3">
       <Icon className="h-5 w-5 text-muted-foreground" />
 
-      <div className="flex-grow">
+      <div className="grow">
         <p className="text-sm text-muted-foreground">{label}</p>
 
         {renderValue()}
@@ -96,7 +108,6 @@ export function TestConfigDisplay({
   if (!config) return null;
 
   const { spec_file_content, ...otherConfig } = config;
-  const formattedSpec = JSON.stringify(JSON.parse(spec_file_content), null, 2);
 
   return (
     <Card>
@@ -114,39 +125,15 @@ export function TestConfigDisplay({
           <SheetTrigger asChild>
             <Button variant="outline">View Spec File</Button>
           </SheetTrigger>
-          <SheetContent className="sm:max-w-[40rem] flex flex-col">
+          <SheetContent className="sm:max-w-160 flex flex-col">
             <SheetHeader>
               <SheetTitle>API Specification</SheetTitle>
               <SheetDescription>
                 The OpenAPI spec file used for this test run.
               </SheetDescription>
             </SheetHeader>
-            <div className="flex-grow overflow-y-auto">
-              <CodeBlock
-                value="json"
-                data={[
-                  {
-                    language: "json",
-                    code: formattedSpec,
-                    filename: "spec.json",
-                  },
-                ]}
-                className="h-full"
-              >
-                <CodeBlockBody className="h-full">
-                  {(item) => (
-                    <CodeBlockItem
-                      key={item.filename}
-                      value={item.language}
-                      className="h-full"
-                    >
-                      <CodeBlockContent className="h-full overflow-y-auto">
-                        {item.code}
-                      </CodeBlockContent>
-                    </CodeBlockItem>
-                  )}
-                </CodeBlockBody>
-              </CodeBlock>
+            <div className="grow overflow-y-auto">
+              <JsonViewer jsonString={spec_file_content} />
             </div>
           </SheetContent>
         </Sheet>

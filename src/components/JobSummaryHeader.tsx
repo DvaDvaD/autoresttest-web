@@ -16,7 +16,7 @@ import { Progress } from "@/components/ui/progress";
 import { replayJob, cancelJob, deleteJob } from "@/lib/api";
 import { TJob } from "@/lib/schema";
 import { format } from "date-fns";
-import { MoreHorizontal, Repeat, XCircle, Trash2 } from "lucide-react";
+import { MoreHorizontal, Repeat, XCircle, Trash2, Copy } from "lucide-react";
 import { toast } from "sonner";
 
 export function JobSummaryHeader({ job }: { job: TJob }) {
@@ -35,6 +35,12 @@ export function JobSummaryHeader({ job }: { job: TJob }) {
       default:
         return "default";
     }
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text).then(() => {
+      toast.success("Job ID copied to clipboard");
+    });
   };
 
   const replayMutation = useMutation({
@@ -78,19 +84,35 @@ export function JobSummaryHeader({ job }: { job: TJob }) {
   return (
     <div className="space-y-3">
       <div className="flex justify-between items-start">
-        <div className="flex flex-wrap items-center gap-4">
-          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
-            {job.summary?.title || `Job: ${job.id}`}
-          </h1>
-          <Badge
-            variant={getStatusVariant(job.status)}
-            className="capitalize text-base"
-          >
-            {isRunning && (
-              <span className="mr-2 h-2 w-2 rounded-full bg-current animate-pulse"></span>
-            )}
-            {job.status}
-          </Badge>
+        <div>
+          <div className="flex flex-wrap items-center gap-4">
+            <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+              {job.summary?.title || `Job`}
+            </h1>
+            <Badge
+              variant={getStatusVariant(job.status)}
+              className="capitalize text-base"
+            >
+              {isRunning && (
+                <span className="mr-2 h-2 w-2 rounded-full bg-current animate-pulse"></span>
+              )}
+              {job.status}
+            </Badge>
+          </div>
+          <div className="flex items-center gap-2 pt-1">
+            <span className="font-bold text-muted-foreground">Job ID:</span>
+            <span className="text-sm font-mono text-muted-foreground">
+              {job.id}
+            </span>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => copyToClipboard(job.id)}
+              className="h-7 w-7 text-muted-foreground hover:text-foreground"
+            >
+              <Copy className="h-3.5 w-3.5" />
+            </Button>
+          </div>
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

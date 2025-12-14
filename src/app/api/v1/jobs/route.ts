@@ -13,9 +13,10 @@ const jobListQuery = Prisma.validator<Prisma.JobFindManyArgs>()({
     status: true,
     statusMessage: true,
     createdAt: true,
+    updatedAt: true,
     summary: true,
   },
-  orderBy: { createdAt: "desc" },
+  orderBy: { updatedAt: "desc" },
 });
 type JobListJob = Prisma.JobGetPayload<typeof jobListQuery>;
 
