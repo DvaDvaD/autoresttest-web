@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchJobs, cancelJob } from "@/lib/api";
+import { fetchJobs, cancelJob, deleteJob, replayJob } from "@/lib/api";
 import {
   createColumnHelper,
   flexRender,
@@ -30,12 +30,27 @@ import {
   SelectValue,
 } from "./ui/select";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useRouter } from "next/navigation";
+import {
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
+  MoreHorizontal,
+  FileText,
+  XCircle,
+  Trash2,
+  Repeat,
 } from "lucide-react";
 import { TJob } from "@/lib/schema";
+import { toast } from "sonner";
 
 const columnHelper = createColumnHelper<TJob>();
 
@@ -50,6 +65,7 @@ const StatusBadge = ({ status }: { status: string }) => {
 };
 
 export function JobHistory() {
+  const router = useRouter();
   const queryClient = useQueryClient();
   const { data: jobs, isLoading } = useQuery<TJob[]>({
     queryKey: ["jobs"],
@@ -69,6 +85,32 @@ export function JobHistory() {
     mutationFn: cancelJob,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["jobs"] });
+      toast.success("Job cancelled successfully");
+    },
+    onError: (error) => {
+      toast.error(`Failed to cancel job: ${error.message}`);
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: deleteJob,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["jobs"] });
+      toast.success("Job deleted successfully");
+    },
+    onError: (error) => {
+      toast.error(`Failed to delete job: ${error.message}`);
+    },
+  });
+
+  const replayMutation = useMutation({
+    mutationFn: replayJob,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["jobs"] });
+      toast.success("Job replay requested successfully");
+    },
+    onError: (error) => {
+      toast.error(`Failed to replay job: ${error.message}`);
     },
   });
 
@@ -98,18 +140,54 @@ export function JobHistory() {
       cell: ({ row }) => {
         const job = row.original;
         return (
-          <div className="space-x-2 text-right">
-            <Button asChild size="sm">
-              <Link href={`/jobs/${job.id}`}>Details</Link>
-            </Button>
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={() => cancelMutation.mutate(job.id)}
-              disabled={job.status !== "queued" && job.status !== "running"}
-            >
-              Cancel
-            </Button>
+          <div className="flex justify-end">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-8 w-8 p-0">
+                  <span className="sr-only">Open menu</span>
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="text-sm" align="end">
+                <DropdownMenuLabel className="font-bold text-base">
+                  Actions
+                </DropdownMenuLabel>
+                <DropdownMenuItem
+                  onSelect={() => router.push(`/jobs/${job.id}`)}
+                >
+                  <FileText className="mr-2 h-4 w-4" />
+                  <span>Details</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onSelect={() => replayMutation.mutate(job.id)}
+                >
+                  <Repeat className="mr-2 h-4 w-4" />
+                  <span>Replay</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onSelect={() => cancelMutation.mutate(job.id)}
+                  disabled={job.status !== "queued" && job.status !== "running"}
+                  className="text-destructive"
+                >
+                  <XCircle className="mr-2 h-4 w-4" />
+                  <span>Cancel</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onSelect={() => {
+                    if (
+                      window.confirm("Are you sure you want to delete this job?")
+                    ) {
+                      deleteMutation.mutate(job.id);
+                    }
+                  }}
+                  className="text-destructive"
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  <span>Delete</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         );
       },
@@ -189,7 +267,7 @@ export function JobHistory() {
               table.setPageSize(Number(value));
             }}
           >
-            <SelectTrigger className="h-8 w-[70px]">
+            <SelectTrigger className="h-8 w-17.5">
               <SelectValue placeholder={table.getState().pagination.pageSize} />
             </SelectTrigger>
             <SelectContent side="top">

@@ -33,3 +33,39 @@ export async function GET(request: Request, props: RouteParams) {
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }
+
+export async function DELETE(request: Request, props: RouteParams) {
+  const { job_id: jobId } = await props.params;
+
+  try {
+    const { userId } = await auth();
+
+    if (!userId) {
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
+
+    console.log(`Attempting to delete job: ${jobId} for user: ${userId}`);
+
+    const deleteResult = await prisma.job.deleteMany({
+      where: {
+        id: jobId,
+        userId: userId,
+      },
+    });
+
+    if (deleteResult.count === 0) {
+      return NextResponse.json(
+        { error: "Job not found or you are not authorized to delete it" },
+        { status: 404 },
+      );
+    }
+
+    return NextResponse.json(
+      { message: "Job deleted successfully" },
+      { status: 200 },
+    );
+  } catch (error) {
+    console.error(`Error deleting job ${jobId}:`, error);
+    return new NextResponse("Internal Server Error", { status: 500 });
+  }
+}

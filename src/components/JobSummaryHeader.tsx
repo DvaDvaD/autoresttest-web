@@ -1,11 +1,28 @@
 "use client";
 
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Progress } from "@/components/ui/progress";
+import { replayJob, cancelJob, deleteJob } from "@/lib/api";
 import { TJob } from "@/lib/schema";
 import { format } from "date-fns";
+import { MoreHorizontal, Repeat, XCircle, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
 export function JobSummaryHeader({ job }: { job: TJob }) {
+  const router = useRouter();
+  const queryClient = useQueryClient();
+
   const getStatusVariant = (status: string) => {
     switch (status) {
       case "completed":
@@ -20,23 +37,97 @@ export function JobSummaryHeader({ job }: { job: TJob }) {
     }
   };
 
+  const replayMutation = useMutation({
+    mutationFn: replayJob,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["job", job.id] });
+      queryClient.invalidateQueries({ queryKey: ["jobs"] });
+      toast.success("Job replay requested successfully");
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to replay job: ${error.message}`);
+    },
+  });
+
+  const cancelMutation = useMutation({
+    mutationFn: cancelJob,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["job", job.id] });
+      queryClient.invalidateQueries({ queryKey: ["jobs"] });
+      toast.success("Job cancelled successfully");
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to cancel job: ${error.message}`);
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: deleteJob,
+    onSuccess: () => {
+      toast.success("Job deleted successfully");
+      queryClient.invalidateQueries({ queryKey: ["jobs"] });
+      router.push("/");
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to delete job: ${error.message}`);
+    },
+  });
+
   const isRunning = job.status === "queued" || job.status === "running";
 
   return (
     <div className="space-y-3">
-      <div className="flex flex-wrap items-center gap-4">
-        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
-          {job.summary?.title || `Job: ${job.id}`}
-        </h1>
-        <Badge
-          variant={getStatusVariant(job.status)}
-          className="capitalize text-base"
-        >
-          {isRunning && (
-            <span className="mr-2 h-2 w-2 rounded-full bg-current animate-pulse"></span>
-          )}
-          {job.status}
-        </Badge>
+      <div className="flex justify-between items-start">
+        <div className="flex flex-wrap items-center gap-4">
+          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+            {job.summary?.title || `Job: ${job.id}`}
+          </h1>
+          <Badge
+            variant={getStatusVariant(job.status)}
+            className="capitalize text-base"
+          >
+            {isRunning && (
+              <span className="mr-2 h-2 w-2 rounded-full bg-current animate-pulse"></span>
+            )}
+            {job.status}
+          </Badge>
+        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="icon">
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DropdownMenuItem onSelect={() => replayMutation.mutate(job.id)}>
+              <Repeat className="mr-2 h-4 w-4" />
+              <span>Replay</span>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onSelect={() => cancelMutation.mutate(job.id)}
+              disabled={!isRunning}
+              className="text-destructive"
+            >
+              <XCircle className="mr-2 h-4 w-4" />
+              <span>Cancel</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onSelect={() => {
+                if (
+                  window.confirm("Are you sure you want to delete this job?")
+                ) {
+                  deleteMutation.mutate(job.id);
+                }
+              }}
+              className="text-destructive"
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              <span>Delete</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       <div className="text-sm text-muted-foreground">

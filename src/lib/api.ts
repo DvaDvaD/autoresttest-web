@@ -69,6 +69,44 @@ export async function cancelJob(jobId: string): Promise<{ message: string }> {
 }
 
 /**
+ * Deletes a job.
+ * @param jobId The ID of the job to delete.
+ */
+export async function deleteJob(jobId: string): Promise<{ message: string }> {
+  const response = await fetch(`/api/v1/jobs/${jobId}`, {
+    method: "DELETE",
+  });
+
+  if (!response.ok) {
+    const errorData = await response
+      .json()
+      .catch(() => ({ error: "Failed to delete job" }));
+    throw new Error(errorData.error || "Failed to delete job");
+  }
+
+  return response.json();
+}
+
+/**
+ * Sends a request to replay a job.
+ * @param jobId The ID of the job to replay.
+ */
+export async function replayJob(jobId: string): Promise<{ message: string }> {
+  const response = await fetch(`/api/v1/jobs/${jobId}/replay`, {
+    method: "POST",
+  });
+
+  if (!response.ok) {
+    const errorData = await response
+      .json()
+      .catch(() => ({ error: "Failed to replay job" }));
+    throw new Error(errorData.error || "Failed to replay job");
+  }
+
+  return response.json();
+}
+
+/**
  * A generic fetcher for any raw data file from a URL.
  * @param url The URL of the file to fetch.
  */
