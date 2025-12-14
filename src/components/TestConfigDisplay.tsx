@@ -46,8 +46,13 @@ const iconMap: Record<string, typeof Link> = {
 };
 
 const JsonViewer = ({ jsonString }: { jsonString: string }) => {
+  let jsonObj;
   try {
-    const jsonObj = JSON.parse(jsonString);
+    jsonObj = JSON.parse(jsonString);
+  } catch (error) {
+    jsonObj = undefined;
+  }
+  if (jsonObj) {
     return (
       <ReactJsonView
         src={jsonObj}
@@ -57,7 +62,7 @@ const JsonViewer = ({ jsonString }: { jsonString: string }) => {
         name={false}
       />
     );
-  } catch (error) {
+  } else {
     return <pre>{jsonString}</pre>;
   }
 };

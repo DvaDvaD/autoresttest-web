@@ -41,8 +41,13 @@ import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 const JsonViewer = ({ jsonString }: { jsonString: string }) => {
+  let jsonObj;
   try {
-    const jsonObj = JSON.parse(jsonString);
+    jsonObj = JSON.parse(jsonString);
+  } catch (error) {
+    jsonObj = undefined;
+  }
+  if (jsonObj) {
     return (
       <ReactJsonView
         src={jsonObj}
@@ -52,8 +57,7 @@ const JsonViewer = ({ jsonString }: { jsonString: string }) => {
         name={false}
       />
     );
-  } catch (error) {
-    // If parsing fails, show the raw text.
+  } else {
     return <pre>{jsonString}</pre>;
   }
 };
