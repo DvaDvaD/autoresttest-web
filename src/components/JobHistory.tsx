@@ -37,6 +37,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { useRouter } from "next/navigation";
 import {
   ChevronLeft,
@@ -48,6 +53,7 @@ import {
   XCircle,
   Trash2,
   Repeat,
+  HelpCircle,
 } from "lucide-react";
 import { TJob } from "@/lib/schema";
 import { toast } from "sonner";
@@ -59,8 +65,8 @@ const StatusBadge = ({ status }: { status: string }) => {
     status === "completed"
       ? "default"
       : status === "failed" || status === "cancelled"
-        ? "destructive"
-        : "secondary";
+      ? "destructive"
+      : "secondary";
   return <Badge variant={variant}>{status}</Badge>;
 };
 
@@ -129,7 +135,27 @@ export function JobHistory() {
     }),
     columnHelper.accessor("status", {
       header: "Status",
-      cell: (info) => <StatusBadge status={info.getValue()} />,
+      cell: (info) => {
+        const status = info.getValue();
+        const job = info.row.original;
+        const hasError = job.status === "failed" && job.statusMessage;
+
+        return (
+          <div className="flex items-center gap-2">
+            <StatusBadge status={status} />
+            {hasError && (
+              <Popover>
+                <PopoverTrigger>
+                  <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                </PopoverTrigger>
+                <PopoverContent>
+                  <p className="text-sm">{job.statusMessage}</p>
+                </PopoverContent>
+              </Popover>
+            )}
+          </div>
+        );
+      },
     }),
     columnHelper.accessor("createdAt", {
       header: "Created At",
