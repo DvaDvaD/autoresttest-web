@@ -225,7 +225,9 @@ export function TestForm() {
               </div>
               <p className="text-xs text-muted-foreground pt-1">
                 Upload the OpenAPI (Swagger) specification file for the API you
-                want to test in JSON format.
+                want to test in JSON format. If not provided, black box testing
+                requests will be made to the URL provided in the API
+                specification.
               </p>
               {specIsTouched && !spec && (
                 <p className="text-xs text-destructive">
@@ -294,6 +296,19 @@ export function TestForm() {
               <p className="text-xs text-muted-foreground pt-1">
                 The name of the GitHub Actions secret that will store your
                 AutoRestTest API key.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="apiUrl">API URL Override (Optional)</Label>
+              <Input
+                id="apiUrl"
+                value={apiUrl}
+                onChange={(e) => setApiUrl(e.target.value)}
+                placeholder="https://api.example.com"
+              />
+              <p className="text-xs text-muted-foreground pt-1">
+                Test against a different environment by providing a new base URL
+                (e.g., a staging server).
               </p>
             </div>
           </CardContent>
