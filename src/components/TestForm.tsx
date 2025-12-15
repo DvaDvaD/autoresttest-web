@@ -138,6 +138,7 @@ export function TestForm() {
       rl_agent_max_exploration: maxExploration[0],
       time_duration_seconds: duration,
       mutation_rate: mutationRate[0],
+      api_url_override: apiUrl,
     };
 
     if (testType === "one-time") {
@@ -145,7 +146,6 @@ export function TestForm() {
       if (!spec) return;
       const config = {
         ...sharedConfig,
-        api_url_override: apiUrl,
       };
       oneTimeJobMutation.mutate({ spec, config });
     } else if (testType === "ci-setup") {
