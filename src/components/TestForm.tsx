@@ -138,7 +138,7 @@ export function TestForm() {
       rl_agent_max_exploration: maxExploration[0],
       time_duration_seconds: duration,
       mutation_rate: mutationRate[0],
-      api_url_override: apiUrl,
+      api_url_override: apiUrl.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl,
     };
 
     if (testType === "one-time") {
