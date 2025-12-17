@@ -15,6 +15,7 @@ const jobListQuery = Prisma.validator<Prisma.JobFindManyArgs>()({
     createdAt: true,
     updatedAt: true,
     summary: true,
+    config: true,
   },
   orderBy: { updatedAt: "desc" },
 });

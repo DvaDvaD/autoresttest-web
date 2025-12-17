@@ -65,8 +65,8 @@ const StatusBadge = ({ status }: { status: string }) => {
     status === "completed"
       ? "default"
       : status === "failed" || status === "cancelled"
-      ? "destructive"
-      : "secondary";
+        ? "destructive"
+        : "secondary";
   return <Badge variant={variant}>{status}</Badge>;
 };
 
@@ -124,14 +124,21 @@ export function JobHistory() {
   const columns = [
     columnHelper.accessor("id", {
       header: "Job ID",
-      cell: (info) => (
-        <Link
-          href={`/jobs/${info.getValue()}`}
-          className="font-mono hover:underline"
-        >
-          {info.getValue()}
-        </Link>
-      ),
+      cell: (info) => {
+        console.log(info.row.original);
+        const api_override_url = info.row.original.config?.api_url_override;
+        return (
+          <div>
+            <Link
+              href={`/jobs/${info.getValue()}`}
+              className="font-mono hover:underline"
+            >
+              {info.getValue()}
+            </Link>
+            <p className="text-xs text-muted-foreground">{api_override_url}</p>
+          </div>
+        );
+      },
     }),
     columnHelper.accessor("status", {
       header: "Status",
