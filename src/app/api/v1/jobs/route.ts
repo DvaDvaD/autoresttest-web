@@ -46,32 +46,46 @@ export async function GET(): Promise<
 // --- POST Handler for Creating Jobs ---
 export async function POST(request: Request) {
   try {
-    const authToken = request.headers.get("Authorization");
-    const internalApiKey = process.env.INTERNAL_API_KEY;
-    const { userId } = await auth();
+    const { userId: clerkUserId } = await auth();
+    const authHeader = request.headers.get("Authorization");
 
-    if (!internalApiKey) {
-      console.error("INTERNAL_API_KEY is not set.");
-      return NextResponse.json(
-        { error: "Internal server configuration error." },
-        { status: 500 },
-      );
+    let jobOwnerId: string | null = clerkUserId;
+    let isMachineRequest = false;
+
+    if (!clerkUserId) {
+      if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        return new NextResponse("Unauthorized", { status: 401 });
+      }
+
+      const apiKey = authHeader.substring(7); // "Bearer ".length
+      const userApiKey = await prisma.userApiKey.findUnique({
+        where: { key: apiKey },
+      });
+
+      if (!userApiKey) {
+        return new NextResponse("Unauthorized: Invalid API Key", {
+          status: 401,
+        });
+      }
+      jobOwnerId = userApiKey.userId;
+      isMachineRequest = true;
     }
 
-    console.log("Auth Token:", authToken);
-    const isMachine = authToken === `Bearer ${internalApiKey}`;
-    if (!userId && !isMachine) {
+    if (!jobOwnerId) {
+      // This should theoretically not be reached
       return new NextResponse("Unauthorized", { status: 401 });
     }
-    console.log("Creating new job for user:", userId || isMachine);
+
+    console.log(
+      `Creating new job for user: ${jobOwnerId} (Machine: ${isMachineRequest})`,
+    );
 
     const body = await request.json();
-    console.log("Request body for new job:", body);
-    const { spec, config, user_id } = body;
+    const { spec, config } = body;
 
     const validationResult = configSchema.safeParse({
       spec_file_content: spec,
-      user_id,
+      user_id: isMachineRequest ? jobOwnerId : undefined,
       ...config,
     });
 
@@ -83,17 +97,11 @@ export async function POST(request: Request) {
     }
     const validatedConfig = validationResult.data;
 
-    if (!userId && !validatedConfig.user_id) {
-      return NextResponse.json(
-        { error: "User ID must be provided for machine requests." },
-        { status: 400 },
-      );
-    }
-
     const newJob = await prisma.job.create({
       data: {
         status: "queued",
-        userId: userId! || validatedConfig.user_id!, // Associate job with the authenticated user
+        userId: jobOwnerId, // Associate job with the authenticated user
+        config: validatedConfig,
       },
     });
 

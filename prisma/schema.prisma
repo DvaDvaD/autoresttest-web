@@ -30,4 +30,14 @@ model User {
   id    String @id
   email String @unique
   jobs  Job[]
+  apiKey UserApiKey?
+}
+
+model UserApiKey {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

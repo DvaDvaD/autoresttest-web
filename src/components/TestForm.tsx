@@ -38,6 +38,7 @@ import { createJob, setupCI } from "@/lib/api";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { UserApiKey } from "@/components/UserApiKey";
 import dynamic from "next/dynamic";
 
 const ReactJsonView = dynamic(() => import("react-json-view"));
@@ -288,6 +289,7 @@ export function TestForm() {
                 The path to the OpenAPI file from the root of your repository.
               </p>
             </div>
+            <UserApiKey />
             <div className="space-y-2">
               <Label htmlFor="apiKeyName">API Key Secret Name</Label>
               <Input

@@ -45,7 +45,7 @@ jobs:
 
           PAYLOAD=$(node -e "
             const fs = require('fs');
-            const spec = require('./market.json');
+            const spec = require('./${escapedSpecPath}');
             const data = {
               spec: JSON.stringify(spec),
               config: ${configJson},

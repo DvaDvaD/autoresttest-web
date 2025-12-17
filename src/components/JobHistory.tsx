@@ -125,7 +125,6 @@ export function JobHistory() {
     columnHelper.accessor("id", {
       header: "Job ID",
       cell: (info) => {
-        console.log(info.row.original);
         const api_override_url = info.row.original.config?.api_url_override;
         return (
           <div>
@@ -146,11 +145,12 @@ export function JobHistory() {
         const status = info.getValue();
         const job = info.row.original;
         const hasError = job.status === "failed" && job.statusMessage;
+        const isRunning = job.status === "running" && job.statusMessage;
 
         return (
           <div className="flex items-center gap-2">
             <StatusBadge status={status} />
-            {hasError && (
+            {(hasError || isRunning) && (
               <Popover>
                 <PopoverTrigger>
                   <HelpCircle className="h-4 w-4 text-muted-foreground" />
