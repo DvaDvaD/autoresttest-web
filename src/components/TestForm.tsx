@@ -145,12 +145,12 @@ export function TestForm() {
       api_url_override: apiUrl.endsWith("/") ? apiUrl.slice(0, -1) : apiUrl,
     };
 
-    setSpecIsTouched(true);
     setApiUrlIsTouched(true);
-    if (!spec) return;
     if (!apiUrl) return;
 
     if (testType === "one-time") {
+      setSpecIsTouched(true);
+      if (!spec) return;
       const config = {
         ...sharedConfig,
       };
