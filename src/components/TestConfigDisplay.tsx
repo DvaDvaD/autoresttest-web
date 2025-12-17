@@ -10,7 +10,6 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import ReactJsonView from "react-json-view";
 import {
   BrainCircuit,
   GitCommit,
@@ -27,6 +26,9 @@ import {
 } from "lucide-react";
 import React from "react";
 import { TManualTestConfig } from "@/lib/schema";
+import dynamic from "next/dynamic";
+
+const ReactJsonView = dynamic(() => import("react-json-view"));
 
 function formatLabel(key: string) {
   return key.replace(/_/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());

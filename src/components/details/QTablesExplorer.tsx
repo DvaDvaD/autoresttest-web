@@ -34,7 +34,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Terminal } from "lucide-react";
-import ReactJson from "react-json-view";
+
+const ReactJson = dynamic(() => import("react-json-view"));
 
 // --- Helper Functions & Components (as before) ---
 
@@ -216,6 +217,7 @@ const OperationAgentViewer = ({ data }: { data: Record<string, number> }) => {
 // --- Main Component ---
 
 import { fetchRawData } from "@/lib/api";
+import dynamic from "next/dynamic";
 
 export function QTablesExplorer({ url }: { url: string | null | undefined }) {
   const { data, isLoading, isError, error } = useQuery<Record<string, unknown>>(
@@ -277,7 +279,7 @@ export function QTablesExplorer({ url }: { url: string | null | undefined }) {
     <div className="space-y-4">
       <div className="flex flex-wrap gap-4 items-center">
         <Select onValueChange={setSelectedAgent} value={selectedAgent}>
-          <SelectTrigger className="w-full md:w-[280px]">
+          <SelectTrigger className="w-full md:w-70">
             <SelectValue placeholder="Select an Agent" />
           </SelectTrigger>
           <SelectContent>

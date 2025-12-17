@@ -28,10 +28,12 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Terminal } from "lucide-react";
-import ReactJson from "react-json-view";
+
+const ReactJson = dynamic(() => import("react-json-view"));
 
 import { fetchRawData } from "@/lib/api";
 import { TGroupedErrors } from "@/lib/schema";
+import dynamic from "next/dynamic";
 
 export function ServerErrorsViewer({
   url,

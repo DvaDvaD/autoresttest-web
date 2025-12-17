@@ -34,11 +34,13 @@ import {
   DropzoneEmptyState,
   DropzoneContent,
 } from "@/components/ui/shadcn-io/dropzone";
-import ReactJsonView from "react-json-view";
 import { createJob, setupCI } from "@/lib/api";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
+
+const ReactJsonView = dynamic(() => import("react-json-view"));
 
 const JsonViewer = ({ jsonString }: { jsonString: string }) => {
   let jsonObj;
@@ -138,7 +140,7 @@ export function TestForm() {
       rl_agent_max_exploration: maxExploration[0],
       time_duration_seconds: duration,
       mutation_rate: mutationRate[0],
-      api_url_override: apiUrl.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl,
+      api_url_override: apiUrl.endsWith("/") ? apiUrl.slice(0, -1) : apiUrl,
     };
 
     if (testType === "one-time") {

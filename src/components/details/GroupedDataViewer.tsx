@@ -12,9 +12,11 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Terminal } from "lucide-react";
-import ReactJson from "react-json-view";
+
+const ReactJson = dynamic(() => import("react-json-view"));
 
 import { fetchRawData } from "@/lib/api";
+import dynamic from "next/dynamic";
 
 export function GroupedDataViewer({
   url,
@@ -95,7 +97,7 @@ export function GroupedDataViewer({
               {operationId}
             </AccordionTrigger>
             <AccordionContent className="p-2 border-t">
-              <div className="p-2 bg-muted rounded-lg max-h-[400px] overflow-auto">
+              <div className="p-2 bg-muted rounded-lg max-h-100 overflow-auto">
                 <ReactJson
                   src={details}
                   theme="monokai"
