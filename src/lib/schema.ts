@@ -41,6 +41,7 @@ export const progressUpdateSchema = z.object({
 export const errorDetailSchema = z.object({
   parameters: z.record(z.string(), z.unknown()).nullable(),
   body: z.record(z.string(), z.unknown()).nullable(),
+  operation_path: z.string(),
 });
 
 // Schema for errors grouped by operation ID

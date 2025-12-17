@@ -73,6 +73,7 @@ export function TestForm() {
   const [spec, setSpec] = useState("");
   const [specFile, setSpecFile] = useState<File[] | undefined>();
   const [specIsTouched, setSpecIsTouched] = useState(false);
+  const [apiUrlIsTouched, setApiUrlIsTouched] = useState(false);
   const [apiUrl, setApiUrl] = useState("");
   // State for CI Setup
   const [repo, setRepo] = useState("");
@@ -144,9 +145,12 @@ export function TestForm() {
       api_url_override: apiUrl.endsWith("/") ? apiUrl.slice(0, -1) : apiUrl,
     };
 
+    setSpecIsTouched(true);
+    setApiUrlIsTouched(true);
+    if (!spec) return;
+    if (!apiUrl) return;
+
     if (testType === "one-time") {
-      setSpecIsTouched(true);
-      if (!spec) return;
       const config = {
         ...sharedConfig,
       };
@@ -239,17 +243,21 @@ export function TestForm() {
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="apiUrl">API URL Override (Optional)</Label>
+              <Label htmlFor="apiUrl">API URL</Label>
               <Input
                 id="apiUrl"
                 value={apiUrl}
                 onChange={(e) => setApiUrl(e.target.value)}
                 placeholder="https://api.example.com"
+                className={`${!apiUrl && apiUrlIsTouched && "border border-destructive!"}`}
               />
               <p className="text-xs text-muted-foreground pt-1">
                 Test against a different environment by providing a new base URL
                 (e.g., a staging server).
               </p>
+              {apiUrlIsTouched && !apiUrl && (
+                <p className="text-xs text-destructive">API URL is required.</p>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -303,17 +311,21 @@ export function TestForm() {
               </p>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="apiUrl">API URL Override (Optional)</Label>
+              <Label htmlFor="apiUrl">API URL</Label>
               <Input
                 id="apiUrl"
                 value={apiUrl}
                 onChange={(e) => setApiUrl(e.target.value)}
                 placeholder="https://api.example.com"
+                className={`${!apiUrl && apiUrlIsTouched && "border border-destructive!"}`}
               />
               <p className="text-xs text-muted-foreground pt-1">
                 Test against a different environment by providing a new base URL
                 (e.g., a staging server).
               </p>
+              {apiUrlIsTouched && !apiUrl && (
+                <p className="text-xs text-destructive">API URL is required.</p>
+              )}
             </div>
           </CardContent>
         </Card>

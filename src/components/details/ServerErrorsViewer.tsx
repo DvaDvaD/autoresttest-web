@@ -97,7 +97,12 @@ export function ServerErrorsViewer({
         >
           <AccordionTrigger className="px-4 py-2 text-base font-medium hover:no-underline">
             <div className="flex items-center gap-4">
-              <span>{operationId}</span>
+              <div>
+                <span>{operationId}</span>
+                <p className="text-muted-foreground text-xs">
+                  {errors[0].operation_path}
+                </p>
+              </div>
               <Badge variant="destructive">{errors.length} unique errors</Badge>
             </div>
           </AccordionTrigger>
