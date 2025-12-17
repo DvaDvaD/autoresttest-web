@@ -73,7 +73,7 @@ export function UserApiKey() {
       <p className="text-xs text-muted-foreground pt-1">
         Use this key in your GitHub secrets to authorize CI/CD runs. <br />
         <b>IMPORTANT:</b> Create the secret variable in an environment with the
-        name "AutoRestTest Web"
+        name &apos;AutoRestTest Web&apos;
       </p>
     </div>
   );
