@@ -30,13 +30,22 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   Dropzone,
   DropzoneEmptyState,
   DropzoneContent,
 } from "@/components/ui/shadcn-io/dropzone";
 import { createJob, setupCI } from "@/lib/api";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, Check } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { UserApiKey } from "@/components/UserApiKey";
 import dynamic from "next/dynamic";
@@ -77,6 +86,7 @@ export function TestForm() {
   const [apiUrl, setApiUrl] = useState("");
   // State for CI Setup
   const [repo, setRepo] = useState("");
+  const [repoIsTouched, setRepoIsTouched] = useState(false);
   const [specPath, setSpecPath] = useState("swagger.json");
   const [apiKeyName, setApiKeyName] = useState("AUTORESTTEST_API_KEY");
   // Universal Advanced Settings
@@ -89,6 +99,8 @@ export function TestForm() {
   const [maxExploration, setMaxExploration] = useState([1]);
   const [duration, setDuration] = useState(60);
   const [mutationRate, setMutationRate] = useState([0.1]);
+
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -109,15 +121,15 @@ export function TestForm() {
   const ciSetupMutation = useMutation({
     mutationFn: setupCI,
     onSuccess: () => {
-      toast.success("Workflow Created!", {
-        description:
-          "The autoresttest.yml workflow has been committed to your repository.",
-      });
+      setShowSuccessDialog(true);
     },
     onError: (error) => {
       toast.error("Setup Failed", { description: error.message });
     },
   });
+
+  const repoRegex = /^[a-zA-Z0-9-]+\/[a-zA-Z0-9-_\.]+$/;
+  const isRepoValid = repoIsTouched && (!repo || !repoRegex.test(repo));
 
   const handleFileDrop = (acceptedFiles: File[]) => {
     setSpecIsTouched(true);
@@ -146,19 +158,21 @@ export function TestForm() {
     };
 
     setApiUrlIsTouched(true);
+    setRepoIsTouched(true);
+    setSpecIsTouched(true);
     if (!apiUrl) return;
 
     if (testType === "one-time") {
-      setSpecIsTouched(true);
       if (!spec) return;
       const config = {
         ...sharedConfig,
       };
       oneTimeJobMutation.mutate({ spec, config });
     } else if (testType === "ci-setup") {
-      if (!repo) {
+      if (!repo || !repoRegex.test(repo)) {
         toast.error("Validation Error", {
-          description: "Repository name is required.",
+          description:
+            "Repository name must be in the format 'owner/repo-name'.",
         });
         return;
       }
@@ -278,13 +292,23 @@ export function TestForm() {
               <Input
                 id="repo"
                 value={repo}
-                onChange={(e) => setRepo(e.target.value)}
+                onChange={(e) => {
+                  if (!repoIsTouched) setRepoIsTouched(true);
+                  setRepo(e.target.value);
+                }}
                 placeholder="owner/repo-name"
+                className={`${isRepoValid ? "border-destructive" : ""}`}
               />
               <p className="text-xs text-muted-foreground pt-1">
                 Provide the full name of the repository where you want to set up
                 the workflow.
               </p>
+              {isRepoValid && (
+                <p className="text-xs text-destructive">
+                  Repository name must be in the format
+                  &apos;owner/repo-name&apos;.
+                </p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="specPath">Path to Spec File</Label>
@@ -512,6 +536,27 @@ export function TestForm() {
           </>
         )}
       </Button>
+
+      <AlertDialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader className="items-center">
+            <div className="flex size-12 items-center justify-center rounded-full bg-green-100 dark:bg-green-900">
+              <Check className="size-6 text-green-600 dark:text-green-400" />
+            </div>
+            <AlertDialogTitle>Workflow Created!</AlertDialogTitle>
+            <AlertDialogDescription className="text-center">
+              The <code>autoresttest.yml</code> workflow has been successfully
+              committed to your repository. This workflow will automatically
+              create and run test jobs in the future based on your configuration.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setShowSuccessDialog(false)}>
+              Got it
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </form>
   );
 }
