@@ -22,6 +22,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   Dialog,
   DialogContent,
@@ -45,7 +46,7 @@ import {
 } from "@/components/ui/shadcn-io/dropzone";
 import { createJob, setupCI } from "@/lib/api";
 import { toast } from "sonner";
-import { Loader2, Check } from "lucide-react";
+import { Loader2, Check, TriangleAlert, Info } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { UserApiKey } from "@/components/UserApiKey";
 import dynamic from "next/dynamic";
@@ -101,6 +102,7 @@ export function TestForm() {
   const [mutationRate, setMutationRate] = useState([0.1]);
 
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [showHelpDialog, setShowHelpDialog] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -334,6 +336,27 @@ export function TestForm() {
                 AutoRestTest API key.
               </p>
             </div>
+            <Alert className="border-yellow-500/50 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 [&>svg]:text-yellow-600 dark:[&>svg]:text-yellow-400">
+              <TriangleAlert className="h-4 w-4" />
+              <AlertTitle>Action Required</AlertTitle>
+              <AlertDescription className="text-xs">
+                You must add your API Key to your repository&apos;s secrets in
+                an environment with the name &quot;AutoRestTest Web&quot; as{" "}
+                <code className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono font-semibold">
+                  {apiKeyName}
+                </code>{" "}
+                for the workflow to run successfully.
+                <Button
+                  variant="link"
+                  className="text-xs! h-auto mt-2 p-0! text-yellow-600 underline decoration-yellow-600 underline-offset-2 hover:text-yellow-700 dark:text-yellow-400 dark:decoration-yellow-400 dark:hover:text-yellow-300"
+                  onClick={() => setShowHelpDialog(true)}
+                  type="button"
+                >
+                  <Info className="h-2 w-2" />
+                  How to do this?
+                </Button>
+              </AlertDescription>
+            </Alert>
             <div className="space-y-2">
               <Label htmlFor="apiUrl">API URL</Label>
               <Input
@@ -547,7 +570,8 @@ export function TestForm() {
             <AlertDialogDescription className="text-center">
               The <code>autoresttest.yml</code> workflow has been successfully
               committed to your repository. This workflow will automatically
-              create and run test jobs in the future based on your configuration.
+              create and run test jobs in the future based on your
+              configuration.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -557,6 +581,60 @@ export function TestForm() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Dialog open={showHelpDialog} onOpenChange={setShowHelpDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>How to Add Repository Secrets</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              To allow AutoRestTest to securely access your API, you need to add
+              your API Key to your GitHub repository secrets. Follow these
+              steps:
+            </p>
+            <ol className="list-decimal space-y-4 pl-4 text-sm">
+              <li>
+                <p>
+                  Navigate to your GitHub repository and click on the{" "}
+                  <strong>Settings</strong> tab.
+                </p>
+              </li>
+              <li>
+                <p>
+                  In the left sidebar, click on{" "}
+                  <strong>Secrets and variables</strong> and then select{" "}
+                  <strong>Actions</strong>.
+                </p>
+              </li>
+              <li>
+                <p>
+                  Click on the <strong>New repository secret</strong> button.
+                </p>
+              </li>
+              <li>
+                <p>
+                  Enter <code>{apiKeyName}</code> in the <strong>Name</strong>{" "}
+                  field.
+                </p>
+              </li>
+              <li>
+                <p>
+                  Paste your API Key into the <strong>Secret</strong> field and
+                  click <strong>Add secret</strong>.
+                </p>
+              </li>
+            </ol>
+            <div className="rounded-md bg-muted p-4">
+              <p className="text-xs text-muted-foreground">
+                <strong>Note:</strong> Make sure you are adding this secret to
+                the correct repository: <code>{repo || "owner/repo-name"}</code>
+                .
+              </p>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </form>
   );
 }
