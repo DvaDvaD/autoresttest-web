@@ -98,6 +98,7 @@ export function TestForm() {
   const [repoIsTouched, setRepoIsTouched] = useState(false);
   const [specPath, setSpecPath] = useState("swagger.json");
   const [apiKeyName, setApiKeyName] = useState("AUTORESTTEST_API_KEY");
+  const [apiKeyNameIsTouched, setApiKeyNameIsTouched] = useState(false);
   // Universal Advanced Settings
   const [llmEngine, setLlmEngine] = useState("gpt-4");
   const [temperature, setTemperature] = useState([0.7]);
@@ -141,6 +142,7 @@ export function TestForm() {
 
   const repoRegex = /^[a-zA-Z0-9-]+\/[a-zA-Z0-9-_\.]+$/;
   const isRepoValid = repoIsTouched && (!repo || !repoRegex.test(repo));
+  const isApiKeyNameValid = apiKeyNameIsTouched && !apiKeyName.trim();
 
   const handleFileDrop = (acceptedFiles: File[]) => {
     setSpecIsTouched(true);
@@ -171,6 +173,7 @@ export function TestForm() {
     setApiUrlIsTouched(true);
     setRepoIsTouched(true);
     setSpecIsTouched(true);
+    setApiKeyNameIsTouched(true);
     if (!apiUrl) return;
 
     if (testType === "one-time") {
@@ -184,6 +187,12 @@ export function TestForm() {
         toast.error("Validation Error", {
           description:
             "Repository name must be in the format 'owner/repo-name'.",
+        });
+        return;
+      }
+      if (!apiKeyName.trim()) {
+        toast.error("Validation Error", {
+          description: "API Key Secret Name is required.",
         });
         return;
       }
@@ -338,19 +347,27 @@ export function TestForm() {
               <Input
                 id="apiKeyName"
                 value={apiKeyName}
-                onChange={(e) => setApiKeyName(e.target.value)}
+                onChange={(e) => {
+                  if (!apiKeyNameIsTouched) setApiKeyNameIsTouched(true);
+                  setApiKeyName(e.target.value);
+                }}
+                className={`${isApiKeyNameValid ? "border-destructive" : ""}`}
               />
               <p className="text-xs text-muted-foreground pt-1">
                 The name of the GitHub Actions secret that will store your
                 AutoRestTest API key.
               </p>
+              {isApiKeyNameValid && (
+                <p className="text-xs text-destructive">
+                  API Key Secret Name is required.
+                </p>
+              )}
             </div>
             <Alert className="border-yellow-500/50 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 [&>svg]:text-yellow-600 dark:[&>svg]:text-yellow-400">
               <TriangleAlert className="h-4 w-4" />
               <AlertTitle>Action Required</AlertTitle>
               <AlertDescription className="text-xs">
-                You must add your API Key to your repository&apos;s secrets in
-                an environment with the name &quot;AutoRestTest Web&quot; as{" "}
+                You must add your API Key to your repository&apos;s secrets as{" "}
                 <code className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono font-semibold">
                   {apiKeyName}
                 </code>{" "}
@@ -445,8 +462,8 @@ export function TestForm() {
                 <Label htmlFor="cachedGraph">Use Cached Graph</Label>
               </div>
               <p className="text-xs text-muted-foreground pt-1 pl-6">
-                Speeds up tests by reusing the previously generated API dependency
-                graph.
+                Speeds up tests by reusing the previously generated API
+                dependency graph.
               </p>
             </div>
             <div>
@@ -472,8 +489,8 @@ export function TestForm() {
                 onChange={(e) => setDuration(parseInt(e.target.value, 10))}
               />
               <p className="text-xs text-muted-foreground pt-1">
-                The total time allocated for the test run (not including the time
-                needed to generate the API graph and Q-tables.)
+                The total time allocated for the test run (not including the
+                time needed to generate the API graph and Q-tables.)
               </p>
             </div>
             <div className="space-y-2">
@@ -490,8 +507,8 @@ export function TestForm() {
                 step={0.01}
               />
               <p className="text-xs text-muted-foreground pt-1">
-                The rate at which the reinforcement learning agent learns from new
-                information.
+                The rate at which the reinforcement learning agent learns from
+                new information.
               </p>
             </div>
             <div className="space-y-2">
