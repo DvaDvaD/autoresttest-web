@@ -85,7 +85,7 @@ export async function POST(request: Request) {
 
     const validationResult = configSchema.safeParse({
       spec_file_content: spec,
-      user_id: isMachineRequest ? jobOwnerId : undefined,
+      user_id: jobOwnerId,
       ...config,
     });
 
@@ -105,22 +105,34 @@ export async function POST(request: Request) {
       },
     });
 
-    await tasks.trigger<typeof apiTestRunner>(
-      "api-test-runner",
-      {
-        jobId: newJob.id,
-        config: validatedConfig,
-      },
-      {
-        tags: [newJob.id],
-      },
-    );
+    try {
+      await tasks.trigger<typeof apiTestRunner>(
+        "api-test-runner",
+        {
+          jobId: newJob.id,
+          config: validatedConfig,
+        },
+        {
+          tags: [newJob.id],
+        },
+      );
+    } catch (triggerError) {
+      console.error("Failed to trigger task for job:", newJob.id, triggerError);
+      await prisma.job.update({
+        where: { id: newJob.id },
+        data: {
+          status: "failed",
+          statusMessage: "Failed to trigger background task service.",
+        },
+      });
+      throw triggerError; // Re-throw to be handled by the outer catch block
+    }
 
     return NextResponse.json({ jobId: newJob.id }, { status: 202 });
   } catch (error) {
     console.error("Error creating job:", error);
     return NextResponse.json(
-      { error: "Failed to create job." },
+      { error: "Something went wrong" },
       { status: 500 },
     );
   }
