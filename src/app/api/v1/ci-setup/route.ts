@@ -54,7 +54,7 @@ jobs:
             console.log(JSON.stringify(data));
           ")
 
-          curl -X POST https://unprofanely-nonnocturnal-latonya.ngrok-free.app/api/v1/jobs \\
+          curl -X POST https://art.dvad.my.id/api/v1/jobs \\
             -H "Content-Type: application/json" \\
             -H "Authorization: Bearer \${{ secrets.${apiKeySecretName} }}" \\
             -d "$PAYLOAD"
