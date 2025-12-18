@@ -41,7 +41,6 @@ jobs:
             echo "Error: Spec file not found at ${escapedSpecPath}"
             exit 1
           fi
-          # Use Node to read and stringify the JSON spec, which is more robust than using shell commands.
 
           PAYLOAD=$(node -e "
             const fs = require('fs');
@@ -54,7 +53,7 @@ jobs:
             console.log(JSON.stringify(data));
           ")
 
-          curl -X POST https://art.dvad.my.id/api/v1/jobs \\
+          curl -f -X POST https://art.dvad.my.id/api/v1/jobs \\
             -H "Content-Type: application/json" \\
             -H "Authorization: Bearer \${{ secrets.${apiKeySecretName} }}" \\
             -d "$PAYLOAD"
