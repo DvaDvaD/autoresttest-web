@@ -46,7 +46,14 @@ import {
 } from "@/components/ui/shadcn-io/dropzone";
 import { createJob, setupCI } from "@/lib/api";
 import { toast } from "sonner";
-import { Loader2, Check, TriangleAlert, Info } from "lucide-react";
+import {
+  Loader2,
+  Check,
+  TriangleAlert,
+  Info,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { UserApiKey } from "@/components/UserApiKey";
 import dynamic from "next/dynamic";
@@ -103,6 +110,7 @@ export function TestForm() {
 
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [showHelpDialog, setShowHelpDialog] = useState(false);
+  const [showAdvancedSettings, setShowAdvancedSettings] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -379,158 +387,168 @@ export function TestForm() {
       )}
 
       <Card>
-        <CardHeader>
+        <CardHeader
+          className="cursor-pointer flex flex-row items-center justify-between space-y-0"
+          onClick={() => setShowAdvancedSettings(!showAdvancedSettings)}
+        >
           <CardTitle>Advanced Settings</CardTitle>
+          {showAdvancedSettings ? (
+            <ChevronUp className="h-4 w-4" />
+          ) : (
+            <ChevronDown className="h-4 w-4" />
+          )}
         </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="llmEngine">LLM Engine</Label>
-            <Select value={llmEngine} onValueChange={setLlmEngine}>
-              <SelectTrigger id="llmEngine">
-                <SelectValue placeholder="Select LLM Engine" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="gpt-4">GPT-4</SelectItem>
-                <SelectItem value="gpt-3.5-turbo">GPT-3.5 Turbo</SelectItem>
-                <SelectItem value="claude-2">Claude 2</SelectItem>
-              </SelectContent>
-            </Select>
-            <p className="text-xs text-muted-foreground pt-1">
-              The underlying model used for generating test cases.
-            </p>
-          </div>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label>LLM Temperature</Label>
-              <span className="text-sm text-muted-foreground">
-                {temperature[0]}
-              </span>
+        {showAdvancedSettings && (
+          <CardContent className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="llmEngine">LLM Engine</Label>
+              <Select value={llmEngine} onValueChange={setLlmEngine}>
+                <SelectTrigger id="llmEngine">
+                  <SelectValue placeholder="Select LLM Engine" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="gpt-4">GPT-4</SelectItem>
+                  <SelectItem value="gpt-3.5-turbo">GPT-3.5 Turbo</SelectItem>
+                  <SelectItem value="claude-2">Claude 2</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground pt-1">
+                The underlying model used for generating test cases.
+              </p>
             </div>
-            <Slider
-              value={temperature}
-              onValueChange={setTemperature}
-              max={1}
-              step={0.1}
-            />
-            <p className="text-xs text-muted-foreground pt-1">
-              Lower values are more deterministic; higher values are more
-              creative.
-            </p>
-          </div>
-          <div>
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="cachedGraph"
-                checked={useCachedGraph}
-                onCheckedChange={(checked) => setUseCachedGraph(!!checked)}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label>LLM Temperature</Label>
+                <span className="text-sm text-muted-foreground">
+                  {temperature[0]}
+                </span>
+              </div>
+              <Slider
+                value={temperature}
+                onValueChange={setTemperature}
+                max={1}
+                step={0.1}
               />
-              <Label htmlFor="cachedGraph">Use Cached Graph</Label>
+              <p className="text-xs text-muted-foreground pt-1">
+                Lower values are more deterministic; higher values are more
+                creative.
+              </p>
             </div>
-            <p className="text-xs text-muted-foreground pt-1 pl-6">
-              Speeds up tests by reusing the previously generated API dependency
-              graph.
-            </p>
-          </div>
-          <div>
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="cachedQTables"
-                checked={useCachedQTables}
-                onCheckedChange={(checked) => setUseCachedQTables(!!checked)}
+            <div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="cachedGraph"
+                  checked={useCachedGraph}
+                  onCheckedChange={(checked) => setUseCachedGraph(!!checked)}
+                />
+                <Label htmlFor="cachedGraph">Use Cached Graph</Label>
+              </div>
+              <p className="text-xs text-muted-foreground pt-1 pl-6">
+                Speeds up tests by reusing the previously generated API dependency
+                graph.
+              </p>
+            </div>
+            <div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="cachedQTables"
+                  checked={useCachedQTables}
+                  onCheckedChange={(checked) => setUseCachedQTables(!!checked)}
+                />
+                <Label htmlFor="cachedQTables">Use Cached Q-Tables</Label>
+              </div>
+              <p className="text-xs text-muted-foreground pt-1 pl-6">
+                Speeds up tests by reusing the agent&apos;s previously learned
+                knowledge.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="duration">Test Duration (seconds)</Label>
+              <Input
+                id="duration"
+                type="number"
+                value={duration}
+                onChange={(e) => setDuration(parseInt(e.target.value, 10))}
               />
-              <Label htmlFor="cachedQTables">Use Cached Q-Tables</Label>
+              <p className="text-xs text-muted-foreground pt-1">
+                The total time allocated for the test run (not including the time
+                needed to generate the API graph and Q-tables.)
+              </p>
             </div>
-            <p className="text-xs text-muted-foreground pt-1 pl-6">
-              Speeds up tests by reusing the agent&apos;s previously learned
-              knowledge.
-            </p>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="duration">Test Duration (seconds)</Label>
-            <Input
-              id="duration"
-              type="number"
-              value={duration}
-              onChange={(e) => setDuration(parseInt(e.target.value, 10))}
-            />
-            <p className="text-xs text-muted-foreground pt-1">
-              The total time allocated for the test run (not including the time
-              needed to generate the API graph and Q-tables.)
-            </p>
-          </div>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label>RL Learning Rate</Label>
-              <span className="text-sm text-muted-foreground">
-                {learningRate[0]}
-              </span>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label>RL Learning Rate</Label>
+                <span className="text-sm text-muted-foreground">
+                  {learningRate[0]}
+                </span>
+              </div>
+              <Slider
+                value={learningRate}
+                onValueChange={setLearningRate}
+                max={1}
+                step={0.01}
+              />
+              <p className="text-xs text-muted-foreground pt-1">
+                The rate at which the reinforcement learning agent learns from new
+                information.
+              </p>
             </div>
-            <Slider
-              value={learningRate}
-              onValueChange={setLearningRate}
-              max={1}
-              step={0.01}
-            />
-            <p className="text-xs text-muted-foreground pt-1">
-              The rate at which the reinforcement learning agent learns from new
-              information.
-            </p>
-          </div>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label>RL Discount Factor</Label>
-              <span className="text-sm text-muted-foreground">
-                {discountFactor[0]}
-              </span>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label>RL Discount Factor</Label>
+                <span className="text-sm text-muted-foreground">
+                  {discountFactor[0]}
+                </span>
+              </div>
+              <Slider
+                value={discountFactor}
+                onValueChange={setDiscountFactor}
+                max={1}
+                step={0.01}
+              />
+              <p className="text-xs text-muted-foreground pt-1">
+                Determines how much the agent prioritizes future rewards over
+                immediate ones.
+              </p>
             </div>
-            <Slider
-              value={discountFactor}
-              onValueChange={setDiscountFactor}
-              max={1}
-              step={0.01}
-            />
-            <p className="text-xs text-muted-foreground pt-1">
-              Determines how much the agent prioritizes future rewards over
-              immediate ones.
-            </p>
-          </div>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label>RL Max Exploration</Label>
-              <span className="text-sm text-muted-foreground">
-                {maxExploration[0]}
-              </span>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label>RL Max Exploration</Label>
+                <span className="text-sm text-muted-foreground">
+                  {maxExploration[0]}
+                </span>
+              </div>
+              <Slider
+                value={maxExploration}
+                onValueChange={setMaxExploration}
+                max={1}
+                step={0.01}
+              />
+              <p className="text-xs text-muted-foreground pt-1">
+                The probability that the agent will explore new actions rather
+                than exploit known ones.
+              </p>
             </div>
-            <Slider
-              value={maxExploration}
-              onValueChange={setMaxExploration}
-              max={1}
-              step={0.01}
-            />
-            <p className="text-xs text-muted-foreground pt-1">
-              The probability that the agent will explore new actions rather
-              than exploit known ones.
-            </p>
-          </div>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label>Mutation Rate</Label>
-              <span className="text-sm text-muted-foreground">
-                {mutationRate[0]}
-              </span>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label>Mutation Rate</Label>
+                <span className="text-sm text-muted-foreground">
+                  {mutationRate[0]}
+                </span>
+              </div>
+              <Slider
+                value={mutationRate}
+                onValueChange={setMutationRate}
+                max={1}
+                step={0.01}
+              />
+              <p className="text-xs text-muted-foreground pt-1">
+                The probability of random changes being introduced during test
+                generation.
+              </p>
             </div>
-            <Slider
-              value={mutationRate}
-              onValueChange={setMutationRate}
-              max={1}
-              step={0.01}
-            />
-            <p className="text-xs text-muted-foreground pt-1">
-              The probability of random changes being introduced during test
-              generation.
-            </p>
-          </div>
-        </CardContent>
+          </CardContent>
+        )}
       </Card>
 
       <Button
