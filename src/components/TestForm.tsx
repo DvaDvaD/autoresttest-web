@@ -33,6 +33,7 @@ import {
 import {
   AlertDialog,
   AlertDialogAction,
+  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
@@ -593,8 +594,16 @@ export function TestForm() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogAction onClick={() => setShowSuccessDialog(false)}>
-              Got it
+            <AlertDialogCancel onClick={() => setShowSuccessDialog(false)}>
+              Close
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                window.open(`https://github.com/${repo}/actions`, "_blank");
+                setShowSuccessDialog(false);
+              }}
+            >
+              View Repository Jobs
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
