@@ -198,7 +198,7 @@ export function TestForm() {
       }
       ciSetupMutation.mutate({
         repository: repo,
-        specPath,
+        specPath: specPath.trim(),
         apiKeyName,
         ...sharedConfig,
       });
