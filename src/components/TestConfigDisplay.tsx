@@ -10,6 +10,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import {
   BrainCircuit,
   GitCommit,
@@ -23,8 +24,10 @@ import {
   Compass,
   CheckCircle2,
   XCircle,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
-import React from "react";
+import React, { useState } from "react";
 import { TManualTestConfig } from "@/lib/schema";
 import dynamic from "next/dynamic";
 
@@ -82,57 +85,102 @@ const ConfigItem = ({
   const renderValue = () => {
     if (typeof value === "boolean") {
       return value ? (
-        <span className="flex items-center font-medium text-green-600">
-          <CheckCircle2 className="mr-2 h-4 w-4" /> True
+        <span className="flex items-center text-sm font-medium text-green-600">
+          <CheckCircle2 className="mr-1.5 h-3.5 w-3.5" /> True
         </span>
       ) : (
-        <span className="flex items-center font-medium text-red-600">
-          <XCircle className="mr-2 h-4 w-4" /> False
+        <span className="flex items-center text-sm font-medium text-red-600">
+          <XCircle className="mr-1.5 h-3.5 w-3.5" /> False
         </span>
       );
     }
-    return <span className="font-semibold">{String(value) || "N/A"}</span>;
+    return (
+      <span className="text-sm font-medium break-all">
+        {String(value) || "N/A"}
+      </span>
+    );
   };
 
   return (
-    <div className="flex items-center gap-3">
-      <Icon className="h-5 w-5 text-muted-foreground" />
+    <div className="group flex items-center gap-3 rounded-lg border bg-card p-3 shadow-sm transition-colors hover:bg-accent/50">
+      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground transition-colors group-hover:bg-background group-hover:text-foreground">
+        <Icon className="h-4.5 w-4.5" />
+      </div>
 
-      <div className="grow">
-        <p className="text-sm text-muted-foreground">{label}</p>
-
+      <div className="flex min-w-0 flex-col gap-0.5">
+        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+          {label}
+        </p>
         {renderValue()}
       </div>
     </div>
   );
 };
 
+const primaryKeys = ["llm_engine", "time_duration_seconds", "api_url_override"];
+
+const behaviorKeys = ["llm_engine_temperature", "mutation_rate"];
+
+const advancedKeys = [
+  "rl_agent_learning_rate",
+  "rl_agent_discount_factor",
+  "rl_agent_max_exploration",
+  "use_cached_graph",
+  "use_cached_q_tables",
+];
+
 export function TestConfigDisplay({
   config,
 }: {
   config: TManualTestConfig | null;
 }) {
+  const [showAdvanced, setShowAdvanced] = useState(false);
+
   if (!config) return null;
 
   const { spec_file_content, ...otherConfig } = config;
 
+  const renderSection = (keys: string[], title?: string) => {
+    const items = keys
+      .filter((key) => key in otherConfig)
+      .map((key) => (
+        <ConfigItem
+          key={key}
+          itemKey={key}
+          value={otherConfig[key as keyof typeof otherConfig]}
+        />
+      ));
+
+    if (items.length === 0) return null;
+
+    return (
+      <div className="space-y-4">
+        {title && (
+          <div className="flex items-center gap-4">
+            <h4 className="shrink-0 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              {title}
+            </h4>
+            <Separator className="grow" />
+          </div>
+        )}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {items}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Test Configuration</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {Object.entries(otherConfig).map(([key, value]) => (
-            <ConfigItem key={key} itemKey={key} value={value} />
-          ))}
-        </div>
-
         <Sheet>
           <SheetTrigger asChild>
-            <Button variant="outline">View Spec File</Button>
+            <Button variant="outline" size="sm">
+              View Spec File
+            </Button>
           </SheetTrigger>
-          <SheetContent className="sm:max-w-160 flex flex-col">
+          <SheetContent className="sm:max-w-2xl flex flex-col">
             <SheetHeader>
               <SheetTitle>API Specification</SheetTitle>
               <SheetDescription>
@@ -144,7 +192,47 @@ export function TestConfigDisplay({
             </div>
           </SheetContent>
         </Sheet>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        {/* Core Settings */}
+        {renderSection(primaryKeys)}
+
+        {/* Behavior Settings */}
+        {renderSection(behaviorKeys, "Behavioral Tuning")}
+
+        {/* Advanced Settings */}
+        <div className="rounded-lg border bg-muted/30 p-1">
+          <Button
+            variant="ghost"
+            onClick={() => setShowAdvanced(!showAdvanced)}
+            className="flex w-full items-center justify-between hover:bg-background"
+          >
+            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Advanced RL & Caching
+            </span>
+            {showAdvanced ? (
+              <ChevronUp className="h-4 w-4 text-muted-foreground" />
+            ) : (
+              <ChevronDown className="h-4 w-4 text-muted-foreground" />
+            )}
+          </Button>
+
+          {showAdvanced && (
+            <div className="mt-2 grid grid-cols-1 gap-3 border-t p-3 sm:grid-cols-2 lg:grid-cols-3">
+              {advancedKeys
+                .filter((key) => key in otherConfig)
+                .map((key) => (
+                  <ConfigItem
+                    key={key}
+                    itemKey={key}
+                    value={otherConfig[key as keyof typeof otherConfig]}
+                  />
+                ))}
+            </div>
+          )}
+        </div>
       </CardContent>
     </Card>
   );
 }
+
