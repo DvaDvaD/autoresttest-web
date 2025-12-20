@@ -52,7 +52,7 @@ export default function HomePage() {
           {/* <div className="-z-10 absolute inset-0 z-0"> */}
           {/*   <CosmicWavesShaders /> */}
           {/* </div> */}
-          <div className="absolute bg-black/80 inset-0 z-0" />
+          <div className="absolute bg-background inset-0 z-0" />
           <main className="relative container mx-auto px-4 py-8">
             <div className="relative z-10 grid grid-cols-1 lg:grid-cols-5 gap-8">
               <div className="lg:col-span-2">
