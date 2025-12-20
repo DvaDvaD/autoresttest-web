@@ -40,7 +40,7 @@ describe('webhooks/clerk/route.ts', () => {
 
   it('should return 400 if svix headers are missing', async () => {
     const mockHeaders = new Headers();
-    (headers as jest.Mock).mockResolvedValue(mockHeaders);
+    jest.mocked(headers).mockResolvedValue(mockHeaders as any);
     
     const req = new Request('http://localhost', { method: 'POST', body: JSON.stringify({}) });
     const response = await POST(req);
@@ -54,14 +54,14 @@ describe('webhooks/clerk/route.ts', () => {
         'svix-timestamp': 'timestamp',
         'svix-signature': 'signature',
     });
-    (headers as jest.Mock).mockResolvedValue(mockHeaders);
+    jest.mocked(headers).mockResolvedValue(mockHeaders as any);
 
     const mockVerify = jest.fn().mockImplementation(() => {
         throw new Error('Invalid signature');
     });
-    (Webhook as unknown as jest.Mock).mockImplementation(() => ({
+    jest.mocked(Webhook).mockImplementation(() => ({
         verify: mockVerify
-    }));
+    }) as any);
 
     const req = new Request('http://localhost', { method: 'POST', body: JSON.stringify({}) });
     const response = await POST(req);
@@ -74,7 +74,7 @@ describe('webhooks/clerk/route.ts', () => {
         'svix-timestamp': 'timestamp',
         'svix-signature': 'signature',
     });
-    (headers as jest.Mock).mockResolvedValue(mockHeaders);
+    jest.mocked(headers).mockResolvedValue(mockHeaders as any);
 
     const payload = {
         type: 'user.created',
@@ -84,9 +84,9 @@ describe('webhooks/clerk/route.ts', () => {
         },
     };
 
-    (Webhook as unknown as jest.Mock).mockImplementation(() => ({
+    jest.mocked(Webhook).mockImplementation(() => ({
         verify: jest.fn().mockReturnValue(payload),
-    }));
+    } as any));
 
     const req = new Request('http://localhost', { method: 'POST', body: JSON.stringify(payload) });
     const response = await POST(req);
@@ -104,16 +104,16 @@ describe('webhooks/clerk/route.ts', () => {
         'svix-timestamp': 'timestamp',
         'svix-signature': 'signature',
     });
-    (headers as jest.Mock).mockResolvedValue(mockHeaders);
+    jest.mocked(headers).mockResolvedValue(mockHeaders as any);
 
     const payload = {
         type: 'session.created', // Ignored event
         data: { id: 'sess_1' },
     };
 
-    (Webhook as unknown as jest.Mock).mockImplementation(() => ({
+    jest.mocked(Webhook).mockImplementation(() => ({
         verify: jest.fn().mockReturnValue(payload),
-    }));
+    } as any));
 
     const req = new Request('http://localhost', { method: 'POST', body: JSON.stringify(payload) });
     const response = await POST(req);

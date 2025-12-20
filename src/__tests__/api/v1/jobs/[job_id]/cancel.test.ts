@@ -31,17 +31,17 @@ describe('jobs/[job_id]/cancel/route.ts', () => {
   });
 
   it('should return 401 if not authenticated', async () => {
-    (auth as jest.Mock).mockResolvedValue({ userId: null });
+    jest.mocked(auth).mockResolvedValue({ userId: null } as any);
     const req = new Request('http://localhost', { method: 'POST' });
     const response = await POST(req, { params });
     expect(response.status).toBe(401);
   });
 
   it('should cancel the run if job exists and has active run', async () => {
-    (auth as jest.Mock).mockResolvedValue({ userId: 'user_1' });
-    (prisma.job.findFirst as jest.Mock).mockResolvedValue({ id: 'job_123' });
-    (runs.list as jest.Mock).mockResolvedValue({ data: [{ id: 'run_1' }] });
-    (runs.cancel as jest.Mock).mockResolvedValue({});
+    jest.mocked(auth).mockResolvedValue({ userId: 'user_1' } as any);
+    jest.mocked(prisma.job.findFirst).mockResolvedValue({ id: 'job_123' } as any);
+    jest.mocked(runs.list).mockResolvedValue({ data: [{ id: 'run_1' }] } as any);
+    jest.mocked(runs.cancel).mockResolvedValue({} as any);
 
     const req = new Request('http://localhost', { method: 'POST' });
     const response = await POST(req, { params });
@@ -51,8 +51,8 @@ describe('jobs/[job_id]/cancel/route.ts', () => {
   });
 
   it('should return 404 if job not found', async () => {
-    (auth as jest.Mock).mockResolvedValue({ userId: 'user_1' });
-    (prisma.job.findFirst as jest.Mock).mockResolvedValue(null);
+    jest.mocked(auth).mockResolvedValue({ userId: 'user_1' } as any);
+    jest.mocked(prisma.job.findFirst).mockResolvedValue(null);
 
     const req = new Request('http://localhost', { method: 'POST' });
     const response = await POST(req, { params });
@@ -60,9 +60,9 @@ describe('jobs/[job_id]/cancel/route.ts', () => {
   });
 
   it('should return 404 if no active run found', async () => {
-    (auth as jest.Mock).mockResolvedValue({ userId: 'user_1' });
-    (prisma.job.findFirst as jest.Mock).mockResolvedValue({ id: 'job_123' });
-    (runs.list as jest.Mock).mockResolvedValue({ data: [] });
+    jest.mocked(auth).mockResolvedValue({ userId: 'user_1' } as any);
+    jest.mocked(prisma.job.findFirst).mockResolvedValue({ id: 'job_123' } as any);
+    jest.mocked(runs.list).mockResolvedValue({ data: [] } as any);
 
     const req = new Request('http://localhost', { method: 'POST' });
     const response = await POST(req, { params });
@@ -70,8 +70,8 @@ describe('jobs/[job_id]/cancel/route.ts', () => {
   });
 
   it('should return 500 on internal error', async () => {
-    (auth as jest.Mock).mockResolvedValue({ userId: 'user_1' });
-    (prisma.job.findFirst as jest.Mock).mockRejectedValue(new Error('DB Error'));
+    jest.mocked(auth).mockResolvedValue({ userId: 'user_1' } as any);
+    jest.mocked(prisma.job.findFirst).mockRejectedValue(new Error('DB Error'));
 
     const req = new Request('http://localhost', { method: 'POST' });
     const response = await POST(req, { params });

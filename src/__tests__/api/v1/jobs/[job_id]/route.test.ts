@@ -25,16 +25,16 @@ describe('jobs/[job_id]/route.ts', () => {
 
   describe('GET', () => {
     it('should return 401 if not authenticated', async () => {
-      (auth as jest.Mock).mockResolvedValue({ userId: null });
+      jest.mocked(auth).mockResolvedValue({ userId: null } as any);
       const req = new Request('http://localhost');
       const response = await GET(req, { params });
       expect(response.status).toBe(401);
     });
 
     it('should return job if found and owned by user', async () => {
-      (auth as jest.Mock).mockResolvedValue({ userId: 'user_1' });
+      jest.mocked(auth).mockResolvedValue({ userId: 'user_1' } as any);
       const mockJob = { id: 'job_123', userId: 'user_1' };
-      (prisma.job.findUnique as jest.Mock).mockResolvedValue(mockJob);
+      jest.mocked(prisma.job.findUnique).mockResolvedValue(mockJob as any);
 
       const req = new Request('http://localhost');
       const response = await GET(req, { params });
@@ -45,8 +45,8 @@ describe('jobs/[job_id]/route.ts', () => {
     });
 
     it('should return 404 if job not found', async () => {
-      (auth as jest.Mock).mockResolvedValue({ userId: 'user_1' });
-      (prisma.job.findUnique as jest.Mock).mockResolvedValue(null);
+      jest.mocked(auth).mockResolvedValue({ userId: 'user_1' } as any);
+      jest.mocked(prisma.job.findUnique).mockResolvedValue(null);
 
       const req = new Request('http://localhost');
       const response = await GET(req, { params });
@@ -54,8 +54,8 @@ describe('jobs/[job_id]/route.ts', () => {
     });
 
     it('should return 500 on internal error', async () => {
-        (auth as jest.Mock).mockResolvedValue({ userId: 'user_1' });
-        (prisma.job.findUnique as jest.Mock).mockRejectedValue(new Error('DB Error'));
+        jest.mocked(auth).mockResolvedValue({ userId: 'user_1' } as any);
+        jest.mocked(prisma.job.findUnique).mockRejectedValue(new Error('DB Error'));
   
         const req = new Request('http://localhost');
         const response = await GET(req, { params });
@@ -65,15 +65,15 @@ describe('jobs/[job_id]/route.ts', () => {
 
   describe('DELETE', () => {
     it('should return 401 if not authenticated', async () => {
-        (auth as jest.Mock).mockResolvedValue({ userId: null });
+        jest.mocked(auth).mockResolvedValue({ userId: null } as any);
         const req = new Request('http://localhost');
         const response = await DELETE(req, { params });
         expect(response.status).toBe(401);
     });
 
     it('should delete job if owned by user', async () => {
-        (auth as jest.Mock).mockResolvedValue({ userId: 'user_1' });
-        (prisma.job.deleteMany as jest.Mock).mockResolvedValue({ count: 1 });
+        jest.mocked(auth).mockResolvedValue({ userId: 'user_1' } as any);
+        jest.mocked(prisma.job.deleteMany).mockResolvedValue({ count: 1 } as any);
 
         const req = new Request('http://localhost');
         const response = await DELETE(req, { params });
@@ -81,8 +81,8 @@ describe('jobs/[job_id]/route.ts', () => {
     });
 
     it('should return 404 if job not found or not authorized', async () => {
-        (auth as jest.Mock).mockResolvedValue({ userId: 'user_1' });
-        (prisma.job.deleteMany as jest.Mock).mockResolvedValue({ count: 0 });
+        jest.mocked(auth).mockResolvedValue({ userId: 'user_1' } as any);
+        jest.mocked(prisma.job.deleteMany).mockResolvedValue({ count: 0 } as any);
 
         const req = new Request('http://localhost');
         const response = await DELETE(req, { params });
@@ -90,8 +90,8 @@ describe('jobs/[job_id]/route.ts', () => {
     });
 
     it('should return 500 on internal error', async () => {
-        (auth as jest.Mock).mockResolvedValue({ userId: 'user_1' });
-        (prisma.job.deleteMany as jest.Mock).mockRejectedValue(new Error('DB Error'));
+        jest.mocked(auth).mockResolvedValue({ userId: 'user_1' } as any);
+        jest.mocked(prisma.job.deleteMany).mockRejectedValue(new Error('DB Error'));
   
         const req = new Request('http://localhost');
         const response = await DELETE(req, { params });

@@ -40,7 +40,7 @@ describe('jobs/[job_id]/progress/route.ts', () => {
   });
 
   it('should update job progress if valid', async () => {
-    (prisma.job.updateMany as jest.Mock).mockResolvedValue({ count: 1 });
+    jest.mocked(prisma.job.updateMany).mockResolvedValue({ count: 1 } as any);
     
     const body = {
       stage: 'test_stage',
@@ -74,7 +74,7 @@ describe('jobs/[job_id]/progress/route.ts', () => {
   });
 
   it('should return success message but no update if job is in terminal state', async () => {
-    (prisma.job.updateMany as jest.Mock).mockResolvedValue({ count: 0 });
+    jest.mocked(prisma.job.updateMany).mockResolvedValue({ count: 0 } as any);
     
     const body = { stage: 'test' };
     const req = new Request('http://localhost', {
@@ -109,7 +109,7 @@ describe('jobs/[job_id]/progress/route.ts', () => {
     // @ts-ignore
     error.code = 'P2025';
 
-    (prisma.job.updateMany as jest.Mock).mockRejectedValue(error);
+    jest.mocked(prisma.job.updateMany).mockRejectedValue(error);
     
     const body = { stage: 'test' };
     const req = new Request('http://localhost', {
@@ -123,7 +123,7 @@ describe('jobs/[job_id]/progress/route.ts', () => {
   });
 
   it('should return 500 on generic error', async () => {
-    (prisma.job.updateMany as jest.Mock).mockRejectedValue(new Error('Generic DB Error'));
+    jest.mocked(prisma.job.updateMany).mockRejectedValue(new Error('Generic DB Error'));
     
     const body = { stage: 'test' };
     const req = new Request('http://localhost', {
