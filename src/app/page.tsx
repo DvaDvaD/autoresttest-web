@@ -21,7 +21,7 @@ export default function HomePage() {
       <Protect
         fallback={
           <div className="relative">
-            <div className="absolute bg-black/80 inset-0 z-0" />
+            <div className="absolute bg-background inset-0 z-0" />
             <main className="relative container mx-auto flex items-center justify-center px-4 py-16">
               <Card className="w-full max-w-md text-center shadow-xl">
                 <CardHeader>
