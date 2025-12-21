@@ -45,7 +45,8 @@ export async function createJob(data: unknown): Promise<{ jobId: string }> {
   });
 
   if (!response.ok) {
-    throw new Error("Failed to create job");
+    const errorData = await response.json();
+    throw new Error(errorData.error || "Failed to create job");
   }
 
   return response.json();
