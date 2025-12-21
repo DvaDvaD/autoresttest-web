@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
+import { ensureUserCanMutate } from "@/lib/permissions";
 
 type RouteParams = { params: Promise<{ job_id: string }> };
 
@@ -42,6 +43,15 @@ export async function DELETE(request: Request, props: RouteParams) {
 
     if (!userId) {
       return new NextResponse("Unauthorized", { status: 401 });
+    }
+
+    try {
+      await ensureUserCanMutate(userId);
+    } catch (error) {
+      if (error instanceof Error) {
+        return NextResponse.json({ error: error.message }, { status: 403 });
+      }
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     console.log(`Attempting to delete job: ${jobId} for user: ${userId}`);

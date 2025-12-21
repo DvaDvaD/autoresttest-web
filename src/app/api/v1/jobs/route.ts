@@ -43,6 +43,8 @@ export async function GET(): Promise<
   }
 }
 
+import { ensureUserCanMutate } from "@/lib/permissions";
+
 // --- POST Handler for Creating Jobs ---
 export async function POST(request: Request) {
   try {
@@ -74,6 +76,15 @@ export async function POST(request: Request) {
     if (!jobOwnerId) {
       // This should theoretically not be reached
       return new NextResponse("Unauthorized", { status: 401 });
+    }
+
+    try {
+      await ensureUserCanMutate(jobOwnerId);
+    } catch (error) {
+      if (error instanceof Error) {
+        return NextResponse.json({ error: error.message }, { status: 403 });
+      }
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     console.log(

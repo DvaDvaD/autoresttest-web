@@ -2,6 +2,7 @@ import { auth, currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { randomBytes } from "crypto";
+import { ensureUserCanMutate } from "@/lib/permissions";
 
 export async function GET() {
   try {
@@ -19,6 +20,15 @@ export async function GET() {
 
     if (dbUser && dbUser.apiKey) {
       return NextResponse.json({ apiKey: dbUser.apiKey.key });
+    }
+
+    try {
+      await ensureUserCanMutate(userId);
+    } catch (error) {
+      if (error instanceof Error) {
+        return NextResponse.json({ error: error.message }, { status: 403 });
+      }
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     const apiKey = `art_${randomBytes(16).toString("hex")}`;
