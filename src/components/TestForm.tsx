@@ -236,7 +236,9 @@ export function TestForm() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="spec">OpenAPI Specification</Label>
+              <Label htmlFor="spec">
+                OpenAPI Specification <span className="text-destructive">*</span>
+              </Label>
               <div className="flex flex-col gap-2">
                 <Dropzone
                   onDrop={handleFileDrop}
@@ -277,7 +279,9 @@ export function TestForm() {
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="apiUrl">API URL</Label>
+              <Label htmlFor="apiUrl">
+                API URL <span className="text-destructive">*</span>
+              </Label>
               <Input
                 id="apiUrl"
                 value={apiUrl}
@@ -308,7 +312,9 @@ export function TestForm() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="repo">Repository Name</Label>
+              <Label htmlFor="repo">
+                Repository Name <span className="text-destructive">*</span>
+              </Label>
               <Input
                 id="repo"
                 value={repo}
@@ -343,7 +349,9 @@ export function TestForm() {
             </div>
             <UserApiKey />
             <div className="space-y-2">
-              <Label htmlFor="apiKeyName">API Key Secret Name</Label>
+              <Label htmlFor="apiKeyName">
+                API Key Secret Name <span className="text-destructive">*</span>
+              </Label>
               <Input
                 id="apiKeyName"
                 value={apiKeyName}
@@ -384,7 +392,9 @@ export function TestForm() {
               </AlertDescription>
             </Alert>
             <div className="space-y-2">
-              <Label htmlFor="apiUrl">API URL</Label>
+              <Label htmlFor="apiUrl">
+                API URL <span className="text-destructive">*</span>
+              </Label>
               <Input
                 id="apiUrl"
                 value={apiUrl}
